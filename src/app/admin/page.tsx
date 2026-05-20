@@ -28,7 +28,7 @@ const OsmdRenderer = dynamic(() => import('@/components/OsmdRenderer'), { ssr: f
 export default function AdminPage() {
   const [exercises, setExercises] = useState<Exercise[]>([]);
   
-  // Claude generation state
+  // DeepSeek / AI generation state
   const [title, setTitle] = useState("Moderne Paradiddle Groove");
   const [category, setCategory] = useState<'rudiments' | 'groove' | 'fills' | 'timing' | 'koordination' | 'stilarter'>('groove');
   const [difficulty, setDifficulty] = useState<'begynder' | 'mellemniveau' | 'øvet'>('mellemniveau');
@@ -40,6 +40,11 @@ export default function AdminPage() {
   const [audioUrl, setAudioUrl] = useState("");
   const [klangioLoading, setKlangioLoading] = useState(false);
   const [klangioLog, setKlangioLog] = useState<string[]>([]);
+
+  // Gemini OMR scan state
+  const [scanFile, setScanFile] = useState<File | null>(null);
+  const [scanLoading, setScanLoading] = useState(false);
+  const [scanLog, setScanLog] = useState<string[]>([]);
   
   // Common states
   const [xmlData, setXmlData] = useState<string>("");
@@ -67,12 +72,12 @@ export default function AdminPage() {
     setSuccessMsg("");
     setLogs([]);
     setXmlData("");
-    addLog("Opretter forbindelse til Claude Sonnet 4.6 API...");
+    addLog("Opretter forbindelse til DeepSeek V3 API...");
     
     // Simuler lidt forsinkelse til valideringstesten (server-side validering)
     const logTimers = [
       setTimeout(() => addLog("Sender prompts og parametre..."), 1000),
-      setTimeout(() => addLog("Claude analyserer sværhedsgrad og taktarter..."), 2200),
+      setTimeout(() => addLog("DeepSeek analyserer sværhedsgrad og taktarter..."), 2200),
       setTimeout(() => addLog("Genererer gyldig MusicXML 4.0 percussion clef..."), 3500),
       setTimeout(() => addLog("Server-side validering: Checker xml integritet..."), 4800)
     ];
@@ -113,6 +118,73 @@ export default function AdminPage() {
       addLog(`❌ FEJL: Server-side validering afviste XML-strukturen (${message})`);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const addScanLog = (msg: string) => {
+    setScanLog(prev => [...prev, `[${new Date().toLocaleTimeString()}] ${msg}`]);
+  };
+
+  const handleScanSheetMusic = async () => {
+    if (!scanFile) {
+      alert("Vælg venligst en fil (billede eller PDF) at scanne.");
+      return;
+    }
+
+    setScanLoading(true);
+    setScanLog([]);
+    setSuccessMsg("");
+    setXmlData("");
+
+    addScanLog("Klargør nodeark til scanning...");
+    addScanLog(`Valgt fil: ${scanFile.name} (${(scanFile.size / 1024).toFixed(1)} KB)`);
+
+    const logTimers = [
+      setTimeout(() => addScanLog("Uploader fil til Gemini OMR API..."), 800),
+      setTimeout(() => addScanLog("Gemini 2.5 Flash analyserer nodelinjer og symboler..."), 2000),
+      setTimeout(() => addScanLog("Ekstraherer takter, tempo og General MIDI percussion mapping..."), 3500),
+      setTimeout(() => addScanLog("Genererer gyldig MusicXML 4.0 percussion clef..."), 5000)
+    ];
+
+    try {
+      const formData = new FormData();
+      formData.append("file", scanFile);
+
+      const response = await fetch('/api/scan-sheet-music', {
+        method: 'POST',
+        body: formData
+      });
+
+      logTimers.forEach(t => clearTimeout(t));
+
+      if (!response.ok) {
+        throw new Error("Fejl under scanning af noder");
+      }
+
+      const data = await response.json();
+
+      if (data.error) {
+        throw new Error(data.error);
+      }
+
+      if (!data.xml || !data.xml.includes('<score-partwise>')) {
+        throw new Error("Ugyldigt MusicXML modtaget fra scanner: Mangler rod-elementer");
+      }
+
+      addScanLog("Scanning og konvertering færdig!");
+      addScanLog("Indlæser node-preview...");
+      setXmlData(data.xml);
+      
+      const baseName = scanFile.name.replace(/\.[^/.]+$/, "");
+      setTitle(`Scannet: ${baseName}`);
+      setActiveTab('preview');
+    } catch (e) {
+      console.error(e);
+      logTimers.forEach(t => clearTimeout(t));
+      const message = e instanceof Error ? e.message : String(e);
+      addScanLog(`❌ FEJL under scanning: ${message}`);
+    } finally {
+      setScanLoading(false);
     }
   };
 
@@ -176,14 +248,14 @@ export default function AdminPage() {
 
       <main style={{ flex: 1, padding: '2rem' }}>
         
-        {/* Admin Header */}
+         {/* Admin Header */}
         <section style={{ maxWidth: '1400px', margin: '0 auto 2rem auto' }}>
           <div className="flex align-center gap-2 mb-1">
             <Settings size={28} className="text-purple" />
             <h1 style={{ fontSize: '2.0rem' }}>Admin Indholdspipeline (DrumLab Owner)</h1>
           </div>
           <p className="text-muted-color" style={{ fontSize: '0.95rem' }}>
-            Brug dette panel til at berige øvelsesbiblioteket via Claude Sonnet 4.6 nodegenerering eller transskribere noder via Klangio Drum2Notes.
+            Brug dette panel til at berige øvelsesbiblioteket via DeepSeek V3 nodegenerering, Gemini 2.5 Flash node-scanning eller transskribere noder via Klangio Drum2Notes.
           </p>
         </section>
 
@@ -200,11 +272,11 @@ export default function AdminPage() {
           {/* Left: Configuration Form */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
             
-            {/* 1. Claude AI generation form */}
+            {/* 1. DeepSeek AI generation form */}
             <div className="glass-card">
               <div className="flex align-center gap-2 mb-2">
                 <Sparkles size={20} className="text-purple" />
-                <h3 style={{ fontSize: '1.2rem' }}>AI-Nodegenerering (Claude Sonnet)</h3>
+                <h3 style={{ fontSize: '1.2rem' }}>AI-Nodegenerering (DeepSeek-V3)</h3>
               </div>
 
               <div className="form-group">
@@ -289,11 +361,86 @@ export default function AdminPage() {
                 className="btn btn-primary w-full"
                 disabled={loading}
               >
-                {loading ? 'Genererer noder via AI...' : 'Generér MusicXML med Claude'}
+                {loading ? 'Genererer noder via AI...' : 'Generér MusicXML med DeepSeek'}
               </button>
             </div>
 
-            {/* 2. Klangio Transcription Sim */}
+            {/* 2. Gemini Flash Node-Scanner */}
+            <div className="glass-card">
+              <div className="flex align-center gap-2 mb-2">
+                <Upload size={20} className="text-purple" />
+                <h3 style={{ fontSize: '1.2rem' }}>AI Billede & PDF Node-Scanner (Gemini 2.5 Flash)</h3>
+              </div>
+              <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }} className="mb-2">
+                Scan et billede (PNG/JPG) eller en PDF af en trommenode og omdan den direkte til spilbart MusicXML.
+              </p>
+
+              <div className="form-group">
+                <label className="form-label">Upload Billede eller PDF</label>
+                <div style={{ 
+                  border: '2px dashed var(--border-color)', 
+                  borderRadius: '8px', 
+                  padding: '1.5rem', 
+                  textAlign: 'center',
+                  background: 'rgba(255,255,255,0.02)',
+                  cursor: 'pointer',
+                  position: 'relative'
+                }}
+                onClick={() => document.getElementById('sheet-upload-input')?.click()}
+                >
+                  <input 
+                    type="file" 
+                    id="sheet-upload-input"
+                    accept="image/*,application/pdf"
+                    style={{ display: 'none' }}
+                    onChange={(e) => {
+                      if (e.target.files && e.target.files[0]) {
+                        setScanFile(e.target.files[0]);
+                      }
+                    }}
+                  />
+                  {scanFile ? (
+                    <div>
+                      <FileCode size={32} className="text-purple m-auto mb-1" />
+                      <p style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--accent-purple)' }}>
+                        {scanFile.name}
+                      </p>
+                      <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                        Klik for at vælge en anden fil
+                      </p>
+                    </div>
+                  ) : (
+                    <div>
+                      <Upload size={32} className="text-muted-color m-auto mb-1" />
+                      <p style={{ fontSize: '0.85rem' }}>
+                        Træk fil hertil eller klik for at vælge
+                      </p>
+                      <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+                        Understøtter JPG, PNG, PDF op til 20MB
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <button 
+                onClick={handleScanSheetMusic} 
+                className="btn btn-primary w-full"
+                disabled={scanLoading || !scanFile}
+              >
+                {scanLoading ? 'Scanner og analyserer noder...' : 'Start Node-Scanning med Gemini'}
+              </button>
+
+              {scanLog.length > 0 && (
+                <div style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '0.75rem', marginTop: '1rem', maxHeight: '120px', overflowY: 'auto' }}>
+                  {scanLog.map((log, i) => (
+                    <div key={i} style={{ fontSize: '0.75rem', fontFamily: 'monospace', color: log.includes('❌') ? 'var(--accent-rose)' : 'var(--accent-purple)', margin: '0.15rem 0' }}>{log}</div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* 3. Klangio Transcription Sim */}
             <div className="glass-card">
               <div className="flex align-center gap-2 mb-2">
                 <Upload size={20} className="text-cyan" />
@@ -387,7 +534,7 @@ export default function AdminPage() {
                   <div className="text-center text-muted-color">
                     <FileCode size={48} className="m-auto mb-2" />
                     <p>Intet nodedata indlæst.</p>
-                    <p style={{ fontSize: '0.8rem' }}>Generér noder med Claude eller kør Klangio simulationen til venstre for at se preview her.</p>
+                    <p style={{ fontSize: '0.8rem' }}>Generér noder med DeepSeek, scan noder med Gemini eller kør Klangio simulationen til venstre for at se preview her.</p>
                   </div>
                 )}
               </div>
