@@ -992,28 +992,19 @@ function LessonDetail({ t, dark, lessonId, onClose, onOpenCoach }: LessonDetailP
           <div>
             <div style={{
               aspectRatio: '16/9', borderRadius: 18, position: 'relative',
-              background: dark ? '#1a1a1c' : '#e8e3da',
+              background: '#000',
               border: `1px solid ${t.border}`, overflow: 'hidden',
-              display: 'flex', alignItems: 'center', cursor: 'pointer',
             }}>
-              <div style={{ position: 'absolute', inset: 0, opacity: 0.4, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <IllKit size={260} color={t.accent} sw={1.2}/>
-              </div>
-              <div style={{
-                width: 64, height: 64, borderRadius: '50%', background: t.accent,
-                display: 'flex', alignItems: 'center', color: '#fff',
-                boxShadow: '0 8px 32px rgba(239,90,58,0.5)', zIndex: 2,
-              }}><IcPlay size={24} fill color="#fff" /></div>
-              <div style={{
-                position: 'absolute', bottom: 10, left: 12, right: 12, zIndex: 2,
-                display: 'flex', alignItems: 'center',
-              }}>
-                <Pill t={t} tone="default">YouTube</Pill>
-                <div style={{
-                  background: 'rgba(0,0,0,0.7)', color: '#fff', padding: '3px 8px',
-                  borderRadius: 6, fontSize: 11, fontFamily: t.mono, fontWeight: 600,
-                }}>12:48</div>
-              </div>
+              <iframe
+                width="100%"
+                height="100%"
+                src="https://www.youtube-nocookie.com/embed/8T_87k23Q1E?rel=0&modestbranding=1"
+                title="Trommelektion - 16-dele Hi-Hat"
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+                style={{ width: '100%', height: '100%', border: '0' }}
+              />
             </div>
             <div style={{ marginTop: 16 }}>
               <Display t={t} size={20}>16-dele hi-hat</Display>
