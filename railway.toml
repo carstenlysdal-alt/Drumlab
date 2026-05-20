@@ -1,8 +1,8 @@
 [build]
-buildCommand = "npm run build && cp -r .next/static .next/standalone/.next/static && cp -r public .next/standalone/public"
+buildCommand = "npm run build"
 
 [deploy]
-startCommand = "HOSTNAME=0.0.0.0 node .next/standalone/server.js"
+startCommand = "HOSTNAME=0.0.0.0 ./node_modules/.bin/next start"
 healthcheckPath = "/"
 healthcheckTimeout = 100
 restartPolicyType = "ON_FAILURE"
