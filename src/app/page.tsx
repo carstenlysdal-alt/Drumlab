@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Header from '@/components/Header';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { 
   Sparkles, 
   Play, 
@@ -17,10 +18,22 @@ import {
 import { setPremiumStatus, resetMockDatabase } from '@/lib/mockData';
 
 export default function LandingPage() {
+  const router = useRouter();
   const [showCheckout, setShowCheckout] = useState(false);
   const [paymentStep, setPaymentStep] = useState<'method' | 'processing' | 'success'>('method');
   const [paymentMethod, setPaymentMethod] = useState<'card' | 'mobilepay'>('card');
   const [paymentSuccess, setPaymentSuccess] = useState(false);
+
+  useEffect(() => {
+    // Detect mobile device user agent or viewport width
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+      navigator.userAgent
+    ) || window.innerWidth < 768;
+
+    if (isMobile) {
+      router.replace('/prototype');
+    }
+  }, [router]);
 
   const handleCheckoutStart = () => {
     setShowCheckout(true);
