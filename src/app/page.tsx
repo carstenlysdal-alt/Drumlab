@@ -210,7 +210,7 @@ function Sidebar({ t, view, onView, selectedCategory, setSelectedCategory, isPre
             <IcSpark size={14} color={t.accent} />
             <span style={{ fontSize: 10, fontWeight: 800, letterSpacing: 1.5, textTransform: 'uppercase', color: t.accent }}>Premium</span>
           </div>
-          <p style={{ fontSize: 11.5, margin: '0 0 12px', color: t.textMuted, lineHeight: 1.5 }}>
+          <p style={{ fontSize: 11.5, margin: '0 0 12px', color: t.textMuted, lineHeight: 1.5, fontFamily: t.font }}>
             AI-læringsplaner, 300+ øvelser og play-alongs.
           </p>
           <button onClick={onUpgrade} style={{
@@ -473,12 +473,12 @@ function HomeView({ t, dark, setDark, onSelectCategory }: {
         <Card t={t} pad={24} style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
           <div>
             <Sect t={t}>Din progression</Sect>
-            <div style={{ fontSize: 11, fontWeight: 700, color: t.textMuted, textTransform: 'uppercase', marginBottom: 6 }}>Denne uge</div>
-            <div style={{ fontSize: 18, fontWeight: 700, color: t.text, marginBottom: 12 }}>
-              3 øvedage · 72 min · Niveau 2
+            <div style={{ fontSize: 11, fontWeight: 700, color: t.textMuted, textTransform: 'uppercase', letterSpacing: 1.2, marginBottom: 6, fontFamily: t.mono }}>Denne uge</div>
+            <div style={{ fontSize: 18, fontWeight: 700, color: t.text, marginBottom: 12, fontFamily: t.font }}>
+              3 øvedage · <span style={{ color: t.accent }}>72 min</span> · Niveau 2
             </div>
-            <p style={{ fontSize: 12, color: t.textMuted, lineHeight: 1.4, marginBottom: 14 }}>
-              Du er 72% af vejen mod dit ugentlige øvemål på 100 minutter.
+            <p style={{ fontSize: 12, color: t.textMuted, lineHeight: 1.5, marginBottom: 14, fontFamily: t.font }}>
+              Du er <span style={{ color: t.accentText, fontWeight: 600 }}>72%</span> af vejen mod dit ugentlige øvemål på 100 minutter.
             </p>
           </div>
           <div>
