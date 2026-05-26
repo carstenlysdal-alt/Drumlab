@@ -1,4 +1,4 @@
-// DrumLab Academy — Curriculum Data
+// Pocket Drummer Academy — Curriculum Data
 // 6 niveauer, 8 søjler, 10 moduler
 
 export interface CurriculumLevel {

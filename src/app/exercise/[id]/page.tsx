@@ -320,7 +320,7 @@ export default function ExercisePage({ params }: PageProps) {
         
         pdf.setFont("helvetica", "bold");
         pdf.setFontSize(18);
-        pdf.text("DRUMLAB - INTERAKTIVE NODER", 15, 20);
+        pdf.text("POCKET DRUMMER - INTERAKTIVE NODER", 15, 20);
         
         pdf.setFont("helvetica", "normal");
         pdf.setFontSize(12);
@@ -330,9 +330,9 @@ export default function ExercisePage({ params }: PageProps) {
         pdf.addImage(imgData, 'PNG', 10, 45, imgWidth, imgHeight);
         
         pdf.setFontSize(9);
-        pdf.text("Genereret via DrumLab v1.2. Alle rettigheder forbeholdes.", 15, 280);
+        pdf.text("Genereret via Pocket Drummer v1.2. Alle rettigheder forbeholdes.", 15, 280);
         
-        pdf.save(`DrumLab_${exercise.titel.replace(/\s+/g, '_')}.pdf`);
+        pdf.save(`Pocket_Drummer_${exercise.titel.replace(/\s+/g, '_')}.pdf`);
       };
     } catch (e) {
       console.error("PDF Export error:", e);

@@ -43,7 +43,7 @@ export default function AdminPage() {
   const [focus, setFocus] = useState("Ghost notes og svage snare beats");
   
   // Custom Prompts & Genres
-  const [systemPrompt, setSystemPrompt] = useState(`Du er DrumLab AI, en ekspert i trommenotering og MusicXML 4.0-struktur.
+  const [systemPrompt, setSystemPrompt] = useState(`Du er Pocket Drummer AI, en ekspert i trommenotering og MusicXML 4.0-struktur.
 Du skal generere en syntaktisk komplet og valid MusicXML-fil for en tromme-øvelse.
 Regler for noteringen:
 - Instrument: Trommesæt (Drums)
@@ -139,7 +139,7 @@ Vigtige regler:
                     <input 
                       type="email" 
                       className="form-control" 
-                      placeholder="admin@drumlab.dk"
+                      placeholder="admin@pocketdrummer.dk"
                       value={adminEmail}
                       onChange={(e) => setAdminEmail(e.target.value)}
                       style={{ background: 'rgba(0, 0, 0, 0.2)', border: '1px solid rgba(255, 255, 255, 0.1)', color: '#FAF8F5' }}
@@ -386,7 +386,7 @@ Vigtige regler:
         <section style={{ maxWidth: '1400px', margin: '0 auto 2rem auto' }}>
           <div className="flex align-center gap-2 mb-1">
             <Settings size={28} className="text-purple" />
-            <h1 style={{ fontSize: '2.0rem' }}>Admin Indholdspipeline (DrumLab Owner)</h1>
+            <h1 style={{ fontSize: '2.0rem' }}>Admin Indholdspipeline (Pocket Drummer Owner)</h1>
           </div>
           <p className="text-muted-color" style={{ fontSize: '0.95rem' }}>
             Brug dette panel til at berige øvelsesbiblioteket via DeepSeek V3 nodegenerering, Gemini 2.5 Flash node-scanning eller transskribere noder via Klangio Drum2Notes.

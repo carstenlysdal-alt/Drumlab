@@ -25,7 +25,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     async function initAuth() {
       try {
         if (typeof window !== 'undefined') {
-          const savedEmail = localStorage.getItem('drumlab_logged_in_email');
+          const savedEmail = localStorage.getItem('pocketdrummer_logged_in_email');
           if (savedEmail) {
             const profile = await firestoreService.getUserProfile(savedEmail);
             if (profile) {
@@ -33,18 +33,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               
               // Sync Firestore data down to localStorage to keep them aligned
               if (profile.completedExercises) {
-                localStorage.setItem('drumlab_completed', JSON.stringify(profile.completedExercises));
+                localStorage.setItem('pocketdrummer_completed', JSON.stringify(profile.completedExercises));
               }
               if (profile.isPremium !== undefined) {
-                localStorage.setItem('drumlab_premium_active', profile.isPremium ? 'true' : 'false');
+                localStorage.setItem('pocketdrummer_premium_active', profile.isPremium ? 'true' : 'false');
               }
               const dbPlan = await firestoreService.getLearningPlan(savedEmail);
               if (dbPlan) {
-                localStorage.setItem('drumlab_user_plan', JSON.stringify(dbPlan));
+                localStorage.setItem('pocketdrummer_user_plan', JSON.stringify(dbPlan));
               }
             } else {
               // If profile doesn't exist in DB anymore, clear local session
-              localStorage.removeItem('drumlab_logged_in_email');
+              localStorage.removeItem('pocketdrummer_logged_in_email');
             }
           }
         }
@@ -65,7 +65,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const profile = await firestoreService.createUserProfile(cleanEmail);
       
       if (typeof window !== 'undefined') {
-        localStorage.setItem('drumlab_logged_in_email', cleanEmail);
+        localStorage.setItem('pocketdrummer_logged_in_email', cleanEmail);
 
         // Merge local data to Firestore if they exist
         const localCompleted = getCompletedExercises();
@@ -76,7 +76,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const dbPlan = await firestoreService.getLearningPlan(cleanEmail);
         const finalPlan = dbPlan || localPlan;
 
-        const isPremiumLocal = localStorage.getItem('drumlab_premium_active') === 'true';
+        const isPremiumLocal = localStorage.getItem('pocketdrummer_premium_active') === 'true';
         const finalPremium = profile.isPremium || isPremiumLocal;
 
         // Save merged data to Firestore
@@ -91,8 +91,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
 
         // Save merged data back to localStorage
-        localStorage.setItem('drumlab_completed', JSON.stringify(mergedCompleted));
-        localStorage.setItem('drumlab_premium_active', finalPremium ? 'true' : 'false');
+        localStorage.setItem('pocketdrummer_completed', JSON.stringify(mergedCompleted));
+        localStorage.setItem('pocketdrummer_premium_active', finalPremium ? 'true' : 'false');
 
         // Update state
         setUser({
@@ -112,10 +112,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Logout
   const logout = async () => {
     if (typeof window !== 'undefined') {
-      localStorage.removeItem('drumlab_logged_in_email');
-      localStorage.removeItem('drumlab_completed');
-      localStorage.removeItem('drumlab_user_plan');
-      localStorage.setItem('drumlab_premium_active', 'false');
+      localStorage.removeItem('pocketdrummer_logged_in_email');
+      localStorage.removeItem('pocketdrummer_completed');
+      localStorage.removeItem('pocketdrummer_user_plan');
+      localStorage.setItem('pocketdrummer_premium_active', 'false');
     }
     setUser(null);
   };
@@ -123,7 +123,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Sync completed exercises list
   const syncCompletedExercises = async (completedIds: string[]) => {
     if (typeof window !== 'undefined') {
-      localStorage.setItem('drumlab_completed', JSON.stringify(completedIds));
+      localStorage.setItem('pocketdrummer_completed', JSON.stringify(completedIds));
     }
     if (user) {
       try {

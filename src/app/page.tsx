@@ -124,7 +124,7 @@ type ViewId = 'home' | 'category' | 'exercises' | 'studio' | 'profile';
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const NAV_ITEMS: { id: ViewId; label: string; icon: React.FC<any>; category?: 'opvarmning' | 'nodelære' | 'grooves' | 'playalong' }[] = [
   { id: 'home', label: 'Hjem', icon: IcHome },
-  { id: 'category', label: 'Play-along', icon: IcPlay, category: 'playalong' },
+  { id: 'category', label: 'Pocket Play-along', icon: IcPlay, category: 'playalong' },
   { id: 'exercises', label: 'Øvelser', icon: TabPractice },
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   { id: 'studio', label: 'Studio Kit', icon: ({ size, color, sw }: any) => <TabKit size={size} color={color} sw={sw} /> },
@@ -154,7 +154,7 @@ function Sidebar({ t, view, onView, selectedCategory, setSelectedCategory, isPre
       {/* Brand */}
       <div style={{ padding: '4px 6px 24px' }}>
         <div style={{ fontFamily: t.serif, fontStyle: 'italic', fontSize: 22, letterSpacing: -0.5, color: t.text, display: 'flex', alignItems: 'baseline', gap: 2 }}>
-          DrumLab<span style={{ color: t.accent, fontStyle: 'normal' }}>.</span>
+          Pocket Drummer<span style={{ color: t.accent, fontStyle: 'normal' }}>.</span>
         </div>
         <div style={{ fontSize: 10, fontFamily: t.mono, color: t.textDim, letterSpacing: 0.5, marginTop: 2 }}>ACADEMY</div>
       </div>
@@ -453,10 +453,10 @@ function HomeView({ t, dark, setDark, onSelectCategory }: {
       <Sect t={t} style={{ marginBottom: 18 }}>Vælg øvespor</Sect>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16 }}>
         {[
-          { id: 'opvarmning' as const, title: 'Opvarmning', desc: 'Start med hænder, fødder, kontrol og timing.', icon: <IllSticks size={52} color={t.accent} /> },
-          { id: 'nodelære' as const, title: 'Nodelære', desc: 'Forstå rytmer, taktarter og trommenotation.', icon: <div style={{ transform: 'scale(0.8)', marginTop: -20, marginBottom: -10 }}><DrumNotation color={t.text} width={140} accent={t.accent} active={2} /></div> },
-          { id: 'grooves' as const, title: 'Grooves & Fills', desc: 'Spil beats, fills, overgange og genrer.', icon: <IllSnare size={62} color={t.accent} /> },
-          { id: 'playalong' as const, title: 'Play-along', desc: 'Spil med musik, backing tracks og form.', icon: <div style={{ width: 42, height: 42, borderRadius: '50%', background: t.accentSoft, display: 'flex', alignItems: 'center', justifyContent: 'center', color: t.accent }}><IcPlay size={20} fill color={t.accent} /></div> },
+          { id: 'opvarmning' as const, title: 'Pocket Opvarmning', desc: 'Start med hænder, fødder, kontrol og timing.', icon: <IllSticks size={52} color={t.accent} /> },
+          { id: 'nodelære' as const, title: 'Pocket Nodelære', desc: 'Forstå rytmer, taktarter og trommenotation.', icon: <div style={{ transform: 'scale(0.8)', marginTop: -20, marginBottom: -10 }}><DrumNotation color={t.text} width={140} accent={t.accent} active={2} /></div> },
+          { id: 'grooves' as const, title: 'Pocket Groove', desc: 'Spil beats, fills, overgange og genrer.', icon: <IllSnare size={62} color={t.accent} /> },
+          { id: 'playalong' as const, title: 'Pocket Play-along', desc: 'Spil med musik, backing tracks og form.', icon: <div style={{ width: 42, height: 42, borderRadius: '50%', background: t.accentSoft, display: 'flex', alignItems: 'center', justifyContent: 'center', color: t.accent }}><IcPlay size={20} fill color={t.accent} /></div> },
         ].map((cat, i) => (
           <Card key={i} t={t} pad={24} onClick={() => onSelectCategory(cat.id)} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 20, transition: 'transform 0.15s ease, border-color 0.15s ease' }}>
             <div style={{ width: 80, height: 80, borderRadius: 14, background: t.sidebar, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', flexShrink: 0, border: `1px solid ${t.border}` }}>
@@ -682,10 +682,10 @@ function CategoryDetailView({ t, category, onBack }: CategoryDetailViewProps) {
   }[category];
 
   const categoryTitle = {
-    opvarmning: 'Opvarmning & Teknik',
-    nodelære: 'Rytmer & Nodelære',
-    grooves: 'Grooves & Fills',
-    playalong: 'Play-along & Form'
+    opvarmning: 'Pocket Opvarmning',
+    nodelære: 'Pocket Nodelære',
+    grooves: 'Pocket Groove',
+    playalong: 'Pocket Play-along'
   }[category];
 
   const categoryBlurb = {
@@ -1488,7 +1488,7 @@ function CheckoutModal({ t, onClose, onSuccess }: { t: T; onClose: () => void; o
         {step === 'pricing' && (
           <>
             <div style={{ textAlign: 'center', marginBottom: 32 }}>
-              <div style={{ fontSize: 14, fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase', color: t.accent, marginBottom: 12 }}>DrumLab Premium</div>
+              <div style={{ fontSize: 14, fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase', color: t.accent, marginBottom: 12 }}>Pocket Drummer Premium</div>
               <div style={{ fontFamily: t.serif, fontStyle: 'italic', fontSize: 40, color: t.text, lineHeight: 1.1, marginBottom: 8 }}>Fuld adgang til alt</div>
               <p style={{ color: t.textMuted, fontSize: 13.5, lineHeight: 1.6, maxWidth: 380, margin: '0 auto' }}>AI-læringsplaner, 300+ øvelser, play-alongs og din personlige AI Coach.</p>
             </div>
@@ -1681,7 +1681,7 @@ export default function App() {
     return (
       <div style={{ minHeight: '100vh', background: '#FAF8F5', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <div style={{ fontFamily: '"DM Serif Display", Georgia, serif', fontStyle: 'italic', fontSize: 28, color: '#252525' }}>
-          DrumLab<span style={{ color: '#F25545' }}>.</span>
+          Pocket Drummer<span style={{ color: '#F25545' }}>.</span>
         </div>
       </div>
     );
@@ -1739,7 +1739,7 @@ export default function App() {
             position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%, -50%)',
             display: 'flex', alignItems: 'center', gap: 8, pointerEvents: 'auto',
           }}>
-            <span style={{ fontFamily: t.font, fontSize: 13, fontWeight: 600, color: t.textMuted, letterSpacing: 0.3 }}>DrumLab Academy</span>
+            <span style={{ fontFamily: t.font, fontSize: 13, fontWeight: 600, color: t.textMuted, letterSpacing: 0.3 }}>Pocket Drummer Academy</span>
             {isPremium ? (
               <span style={{ fontSize: 9, fontWeight: 800, background: t.goodSoft, color: t.good, padding: '2px 8px', borderRadius: 4, letterSpacing: 0.8, textTransform: 'uppercase' }}>PRO</span>
             ) : (

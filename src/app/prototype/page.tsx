@@ -436,7 +436,7 @@ function OnboardingScreen({ t, onStart }: { t: ThemeTokens; dark: boolean; onSta
           fontFamily: t.serif, fontStyle: 'italic', fontSize: 56, letterSpacing: -1,
           lineHeight: 1, display: 'flex', alignItems: 'baseline',
         }}>
-          DrumLab<span style={{ color: t.accent, fontStyle: 'normal' }}>.</span>
+          Pocket Drummer<span style={{ color: t.accent, fontStyle: 'normal' }}>.</span>
         </div>
         <div style={{
           fontFamily: t.font, fontSize: 12, fontWeight: 700, letterSpacing: 2.4,
@@ -537,10 +537,10 @@ function HomeScreen({ t, dark, setDark, onSelectCategory, onOpenCoach }: HomeScr
         <SectionLabel t={t}>Vælg øvespor</SectionLabel>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           {[
-            { id: 'opvarmning' as const, title: 'Opvarmning', desc: 'Start med hænder, fødder, kontrol og timing.', icon: <IcWave size={20} /> },
-            { id: 'nodelære' as const, title: 'Nodelære', desc: 'Forstå rytmer, taktarter og trommenotation.', icon: <IcMetro size={20} /> },
-            { id: 'grooves' as const, title: 'Grooves & Fills', desc: 'Spil beats, fills, overgange og genrer.', icon: <TabKit size={20} color={t.accent} /> },
-            { id: 'playalong' as const, title: 'Play-along', desc: 'Spil med musik, backing tracks og form.', icon: <TabPlayalong size={20} color={t.accent} /> }
+            { id: 'opvarmning' as const, title: 'Pocket Opvarmning', desc: 'Start med hænder, fødder, kontrol og timing.', icon: <IcWave size={20} /> },
+            { id: 'nodelære' as const, title: 'Pocket Nodelære', desc: 'Forstå rytmer, taktarter og trommenotation.', icon: <IcMetro size={20} /> },
+            { id: 'grooves' as const, title: 'Pocket Groove', desc: 'Spil beats, fills, overgange og genrer.', icon: <TabKit size={20} color={t.accent} /> },
+            { id: 'playalong' as const, title: 'Pocket Play-along', desc: 'Spil med musik, backing tracks og form.', icon: <TabPlayalong size={20} color={t.accent} /> }
           ].map((cat) => (
             <div key={cat.id} onClick={() => onSelectCategory(cat.id)} style={{
               background: t.surface, border: `1px solid ${t.border}`,
@@ -627,7 +627,7 @@ const practiceTracks = [
 
 function PracticeScreen({ t, onSelectCategory }: PracticeScreenProps) {
   const [search, setSearch] = useState('');
-  const [activeChip, setActiveChip] = useState<'Alle' | 'Opvarmning' | 'Nodelære' | 'Grooves & Fills' | 'Play-along'>('Alle');
+  const [activeChip, setActiveChip] = useState<'Alle' | 'Pocket Opvarmning' | 'Pocket Nodelære' | 'Pocket Groove' | 'Pocket Play-along'>('Alle');
 
   const allExercises = [
     { id: 'warmup-1', cat: 'opvarmning' as const, title: '5 min teknik-start', sub: 'Single strokes og håndkontrol', dur: '5 min', bpm: '80', level: 'Begynder', tags: ['5 min', 'Single strokes'] },
@@ -648,10 +648,10 @@ function PracticeScreen({ t, onSelectCategory }: PracticeScreenProps) {
     if (!matchesSearch) return false;
 
     if (activeChip === 'Alle') return true;
-    if (activeChip === 'Opvarmning') return ex.cat === 'opvarmning';
-    if (activeChip === 'Nodelære') return ex.cat === 'nodelære';
-    if (activeChip === 'Grooves & Fills') return ex.cat === 'grooves';
-    if (activeChip === 'Play-along') return ex.cat === 'playalong';
+    if (activeChip === 'Pocket Opvarmning') return ex.cat === 'opvarmning';
+    if (activeChip === 'Pocket Nodelære') return ex.cat === 'nodelære';
+    if (activeChip === 'Pocket Groove') return ex.cat === 'grooves';
+    if (activeChip === 'Pocket Play-along') return ex.cat === 'playalong';
     return true;
   });
 
@@ -690,7 +690,7 @@ function PracticeScreen({ t, onSelectCategory }: PracticeScreenProps) {
 
         {/* Filter chips */}
         <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 8, scrollbarWidth: 'none' }}>
-          {(['Alle', 'Opvarmning', 'Nodelære', 'Grooves & Fills', 'Play-along'] as const).map(chip => {
+          {(['Alle', 'Pocket Opvarmning', 'Pocket Nodelære', 'Pocket Groove', 'Pocket Play-along'] as const).map(chip => {
             const active = activeChip === chip;
             return (
               <button key={chip} onClick={() => setActiveChip(chip)} style={{
@@ -718,7 +718,7 @@ function PracticeScreen({ t, onSelectCategory }: PracticeScreenProps) {
                 color: ex.cat === 'opvarmning' ? '#3eaf7c' : ex.cat === 'nodelære' ? '#4287f5' : ex.cat === 'grooves' ? t.accent : '#9b59b6',
                 textTransform: 'uppercase', letterSpacing: 0.5
               }}>
-                {ex.cat === 'grooves' ? 'Grooves' : ex.cat}
+                {ex.cat === 'grooves' ? 'Pocket Groove' : ex.cat === 'opvarmning' ? 'Pocket Opvarmning' : ex.cat === 'nodelære' ? 'Pocket Nodelære' : ex.cat === 'playalong' ? 'Pocket Play-along' : ex.cat}
               </span>
               <span style={{ fontSize: 11, color: t.textMuted, fontFamily: t.mono }}>{ex.dur} · {ex.bpm} BPM</span>
             </div>
@@ -954,10 +954,10 @@ function MobileCategoryDetail({ t, category, onClose, onOpenCoach }: MobileCateg
   }[category];
 
   const categoryTitle = {
-    opvarmning: 'Opvarmning & Teknik',
-    nodelære: 'Rytmer & Nodelære',
-    grooves: 'Grooves & Fills',
-    playalong: 'Play-along & Form'
+    opvarmning: 'Pocket Opvarmning',
+    nodelære: 'Pocket Nodelære',
+    grooves: 'Pocket Groove',
+    playalong: 'Pocket Play-along'
   }[category];
 
   const categoryBlurb = {
@@ -2145,7 +2145,7 @@ function ProfileScreen({ t, dark, setDark }: ProfileScreenProps) {
       </div>
 
       <div style={{ textAlign: 'center', marginTop: 28, fontSize: 10, color: t.textDim, fontFamily: t.mono, letterSpacing: 1, textTransform: 'uppercase' }}>
-        DrumLab v1.2.0
+        Pocket Drummer v1.2.0
       </div>
     </div>
   );
@@ -2244,7 +2244,7 @@ export default function MobilePrototype() {
   // Initialize onboarded status from localStorage client-side
   useEffect(() => {
     try {
-      const val = localStorage.getItem('drumlab-onboarded');
+      const val = localStorage.getItem('pocketdrummer-onboarded');
       setTimeout(() => {
         setOnboarded(val === '1');
       }, 0);
@@ -2265,7 +2265,7 @@ export default function MobilePrototype() {
 
   const completeOnboarding = () => {
     try {
-      localStorage.setItem('drumlab-onboarded', '1');
+      localStorage.setItem('pocketdrummer-onboarded', '1');
     } catch {
       // Ignore errors silently
     }
@@ -2274,7 +2274,7 @@ export default function MobilePrototype() {
 
   const handleResetOnboarding = () => {
     try {
-      localStorage.removeItem('drumlab-onboarded');
+      localStorage.removeItem('pocketdrummer-onboarded');
     } catch {
       // Ignore errors silently
     }

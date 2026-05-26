@@ -330,9 +330,9 @@ export const initialExercises: Exercise[] = [
 // Database State Helpers (persisteret via localStorage)
 export function getSavedExercises(): Exercise[] {
   if (typeof window === 'undefined') return initialExercises;
-  const saved = localStorage.getItem('drumlab_exercises');
+  const saved = localStorage.getItem('pocketdrummer_exercises');
   if (!saved) {
-    localStorage.setItem('drumlab_exercises', JSON.stringify(initialExercises));
+    localStorage.setItem('pocketdrummer_exercises', JSON.stringify(initialExercises));
     return initialExercises;
   }
   return JSON.parse(saved);
@@ -347,12 +347,12 @@ export function saveExercise(exercise: Exercise) {
   } else {
     exercises.push(exercise);
   }
-  localStorage.setItem('drumlab_exercises', JSON.stringify(exercises));
+  localStorage.setItem('pocketdrummer_exercises', JSON.stringify(exercises));
 }
 
 export function getCompletedExercises(): string[] {
   if (typeof window === 'undefined') return [];
-  const completed = localStorage.getItem('drumlab_completed');
+  const completed = localStorage.getItem('pocketdrummer_completed');
   return completed ? JSON.parse(completed) : [];
 }
 
@@ -367,7 +367,7 @@ export function toggleExerciseCompleted(id: string): boolean {
     completed.push(id);
     isCompleted = true;
   }
-  localStorage.setItem('drumlab_completed', JSON.stringify(completed));
+  localStorage.setItem('pocketdrummer_completed', JSON.stringify(completed));
   return isCompleted;
 }
 
@@ -385,9 +385,9 @@ export function getUserGoal(): UserGoal {
   };
   
   if (typeof window === 'undefined') return defaultGoal;
-  const saved = localStorage.getItem('drumlab_user_goal');
+  const saved = localStorage.getItem('pocketdrummer_user_goal');
   if (!saved) {
-    localStorage.setItem('drumlab_user_goal', JSON.stringify(defaultGoal));
+    localStorage.setItem('pocketdrummer_user_goal', JSON.stringify(defaultGoal));
     return defaultGoal;
   }
   return JSON.parse(saved);
@@ -395,35 +395,35 @@ export function getUserGoal(): UserGoal {
 
 export function saveUserGoal(goal: UserGoal) {
   if (typeof window === 'undefined') return;
-  localStorage.setItem('drumlab_user_goal', JSON.stringify(goal));
+  localStorage.setItem('pocketdrummer_user_goal', JSON.stringify(goal));
 }
 
 export function getUserPlan(): UserPlan | null {
   if (typeof window === 'undefined') return null;
-  const saved = localStorage.getItem('drumlab_user_plan');
+  const saved = localStorage.getItem('pocketdrummer_user_plan');
   return saved ? JSON.parse(saved) : null;
 }
 
 export function saveUserPlan(plan: UserPlan) {
   if (typeof window === 'undefined') return;
-  localStorage.setItem('drumlab_user_plan', JSON.stringify(plan));
+  localStorage.setItem('pocketdrummer_user_plan', JSON.stringify(plan));
 }
 
 export function getPremiumStatus(): boolean {
   if (typeof window === 'undefined') return false;
-  return localStorage.getItem('drumlab_premium_active') === 'true';
+  return localStorage.getItem('pocketdrummer_premium_active') === 'true';
 }
 
 export function setPremiumStatus(active: boolean) {
   if (typeof window === 'undefined') return;
-  localStorage.setItem('drumlab_premium_active', active ? 'true' : 'false');
+  localStorage.setItem('pocketdrummer_premium_active', active ? 'true' : 'false');
 }
 
 export function resetMockDatabase() {
   if (typeof window === 'undefined') return;
-  localStorage.setItem('drumlab_exercises', JSON.stringify(initialExercises));
-  localStorage.removeItem('drumlab_completed');
-  localStorage.removeItem('drumlab_user_goal');
-  localStorage.removeItem('drumlab_user_plan');
-  localStorage.setItem('drumlab_premium_active', 'false');
+  localStorage.setItem('pocketdrummer_exercises', JSON.stringify(initialExercises));
+  localStorage.removeItem('pocketdrummer_completed');
+  localStorage.removeItem('pocketdrummer_user_goal');
+  localStorage.removeItem('pocketdrummer_user_plan');
+  localStorage.setItem('pocketdrummer_premium_active', 'false');
 }

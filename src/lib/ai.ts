@@ -26,7 +26,7 @@ export async function generateLearningPlan(input: GeneratePlanInput): Promise<Le
   }
 
   try {
-    const systemPrompt = `Du er DrumLab AI, en ekspert i trommeundervisning på det danske marked. 
+    const systemPrompt = `Du er Pocket Drummer AI, en ekspert i trommeundervisning på det danske marked. 
 Din opgave er at generere en personlig 4-ugers træningsplan for en bruger baseret på deres angivne mål, niveau, daglige øvetid og tidshorisont.
 Svar skal være på DANSK.
 Du SKAL vælge øvelser fra denne liste af eksisterende øvelses-id'er:
@@ -97,7 +97,7 @@ export async function generateMusicXML(input: GenerateMusicXMLInput): Promise<st
   }
 
   try {
-    const defaultSystemPrompt = `Du er DrumLab AI, en ekspert i trommenotering og MusicXML 4.0-struktur.
+    const defaultSystemPrompt = `Du er Pocket Drummer AI, en ekspert i trommenotering og MusicXML 4.0-struktur.
 Du skal generere en syntaktisk komplet og valid MusicXML-fil for en tromme-øvelse.
 Regler for noteringen:
 - Instrument: Trommesæt (Drums)

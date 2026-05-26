@@ -2,9 +2,9 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "DrumLab · Trommeøve-platform med AI-læringsplaner",
-  description: "DrumLab er en dansk abonnementsplatform for trommespillere. Få personlige AI-genererede læringsplaner, interaktive trommenoder og PDF-download.",
-  keywords: ["trommer", "trommeundervisning", "trommenoder", "drumlab", "AI læringsplan", "musikundervisning"],
+  title: "Pocket Drummer · Trommeøve-platform med AI-læringsplaner",
+  description: "Pocket Drummer er en dansk abonnementsplatform for trommespillere. Få personlige AI-genererede læringsplaner, interaktive trommenoder og PDF-download.",
+  keywords: ["trommer", "trommeundervisning", "trommenoder", "pocket drummer", "AI læringsplan", "musikundervisning"],
 };
 
 export const viewport: Viewport = {
