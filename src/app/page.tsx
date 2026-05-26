@@ -305,16 +305,22 @@ function CoachPanel({ t, open, onToggle, isPremium, onUpgrade, onNavigate }: {
 
   if (!open) return (
     <button onClick={onToggle} style={{
-      position: 'absolute', bottom: 28, right: 24, width: 48, height: 48, borderRadius: '50%',
+      position: 'absolute', bottom: 28, right: 28, width: 48, height: 48, borderRadius: '50%',
       background: t.accent, border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-      boxShadow: '0 8px 24px rgba(239,90,58,0.45)',
+      boxShadow: '0 8px 24px rgba(239,90,58,0.45)', zIndex: 100,
     }}>
       <IcSpark size={20} color="#fff" />
     </button>
   );
 
   return (
-    <div style={{ width: 340, height: '100%', flexShrink: 0, borderLeft: `1px solid ${t.border}`, background: t.sidebar, display: 'flex', flexDirection: 'column' }}>
+    <div style={{
+      position: 'absolute', bottom: 88, right: 28, zIndex: 100,
+      width: 340, height: 480, borderRadius: 16,
+      background: t.sidebar, border: `1px solid ${t.border}`,
+      display: 'flex', flexDirection: 'column',
+      boxShadow: '0 16px 48px rgba(0,0,0,0.35)',
+    }}>
       {/* Header */}
       <div style={{ padding: '16px 18px', borderBottom: `1px solid ${t.border}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div>
@@ -464,8 +470,7 @@ function HomeView({ t, dark, setDark, onSelectCategory }: {
             </div>
           </div>
           <div style={{ width: 180, position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', background: dark ? '#101012' : '#F3EFE7', borderLeft: `1px solid ${t.border}`, flexShrink: 0 }}>
-            <div style={{ position: 'absolute', width: 140, height: 140, background: `radial-gradient(circle, ${t.accentSoft} 0%, transparent 65%)` }} />
-            <div style={{ position: 'relative' }}><IllSnare size={130} color={t.accent} sw={1.4} /></div>
+            <IllSnare size={130} color={t.accent} sw={1.4} />
           </div>
         </Card>
 
@@ -1661,15 +1666,13 @@ export default function App() {
   const [dark, setDark] = useState(false); // Default to Light mode
   const [selectedCategory, setSelectedCategory] = useState<'opvarmning' | 'nodelære' | 'grooves' | 'playalong' | null>(null);
   const [view, setView] = useState<ViewId>('home');
-  const [coachOpen, setCoachOpen] = useState(true);
+  const [coachOpen, setCoachOpen] = useState(false);
   const [isPremium, setIsPremium] = useState(false);
   const [showCheckout, setShowCheckout] = useState(false);
   const [, setPlan] = useState<UserPlan | null>(null);
   const [completedIds, setCompletedIds] = useState<string[]>([]);
 
   const t = useMemo(() => mkT(dark), [dark]);
-  const scale = useFitScale(1440, 900, 0);
-
   // Sync state with user profile
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -1767,64 +1770,34 @@ export default function App() {
   const hideCoach = view === 'studio';
 
   return (
-    <div style={{ width: '100vw', height: '100vh', background: '#050505', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
-      {/* macOS window */}
-      <div style={{
-        transform: `scale(${scale})`, transformOrigin: 'center center',
-        width: 1440, height: 900, borderRadius: 14, overflow: 'hidden',
-        background: t.bg, color: t.text,
-        boxShadow: '0 40px 100px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.06)',
-        fontFamily: t.font, display: 'flex', flexDirection: 'column',
-      }}>
-        {/* Title bar */}
-        <div style={{ height: 44, flexShrink: 0, background: t.sidebar, borderBottom: `1px solid ${t.border}`, display: 'flex', alignItems: 'center', padding: '0 16px', position: 'relative' }}>
-          <TrafficLights />
-          <div style={{
-            position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%, -50%)',
-            display: 'flex', alignItems: 'center', gap: 8, pointerEvents: 'auto',
-          }}>
-            <span style={{ fontFamily: t.font, fontSize: 13, fontWeight: 600, color: t.textMuted, letterSpacing: 0.3 }}>Pocket Drummer</span>
-            {isPremium ? (
-              <span style={{ fontSize: 9, fontWeight: 800, background: t.goodSoft, color: t.good, padding: '2px 8px', borderRadius: 4, letterSpacing: 0.8, textTransform: 'uppercase' }}>PRO</span>
-            ) : (
-              <button onClick={openCheckout} style={{ fontSize: 9, fontWeight: 800, background: t.accent, color: '#fff', border: 'none', padding: '3px 9px', borderRadius: 4, letterSpacing: 0.8, textTransform: 'uppercase', cursor: 'pointer', boxShadow: '0 2px 8px rgba(239,90,58,0.4)' }}>
-                Opgrader
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* Body */}
-        <div style={{ flex: 1, display: 'flex', overflow: 'hidden', position: 'relative' }}>
-          <Sidebar
+    <div style={{ width: '100vw', height: '100vh', background: t.bg, color: t.text, fontFamily: t.font, display: 'flex', overflow: 'hidden' }}>
+      <Sidebar
+        t={t}
+        view={view}
+        onView={setView}
+        selectedCategory={selectedCategory}
+        setSelectedCategory={setSelectedCategory}
+        dark={dark}
+        isPremium={isPremium}
+        onUpgrade={openCheckout}
+      />
+      <div style={{ flex: 1, overflow: 'auto', position: 'relative' }}>
+        {content}
+        {!hideCoach && (
+          <CoachPanel
             t={t}
-            view={view}
-            onView={setView}
-            selectedCategory={selectedCategory}
-            setSelectedCategory={setSelectedCategory}
             dark={dark}
+            open={coachOpen}
+            onToggle={() => setCoachOpen(!coachOpen)}
             isPremium={isPremium}
             onUpgrade={openCheckout}
+            onNavigate={(v, cat) => {
+              if (cat) { setSelectedCategory(cat); setView('category'); }
+              else setView(v);
+              setCoachOpen(false);
+            }}
           />
-          <div style={{ flex: 1, overflow: 'auto', background: t.bg, position: 'relative' }}>
-            {content}
-          </div>
-          {!hideCoach && (
-            <CoachPanel
-              t={t}
-              dark={dark}
-              open={coachOpen}
-              onToggle={() => setCoachOpen(!coachOpen)}
-              isPremium={isPremium}
-              onUpgrade={openCheckout}
-              onNavigate={(v, cat) => {
-                if (cat) { setSelectedCategory(cat); setView('category'); }
-                else setView(v);
-                setCoachOpen(false);
-              }}
-            />
-          )}
-        </div>
+        )}
       </div>
 
       {/* Checkout modal */}

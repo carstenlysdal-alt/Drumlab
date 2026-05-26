@@ -1,6 +1,9 @@
 {
+  "functions": {
+    "source": "functions"
+  },
   "hosting": {
-    "site": "drumlab",
+    "site": "pocket-drummer",
     "source": ".",
     "ignore": [
       "firebase.json",
@@ -9,7 +12,8 @@
     ],
     "frameworksBackend": {
       "region": "us-central1",
-      "framework": "nextjs"
+      "framework": "nextjs",
+      "secrets": ["DEEPSEEK_API_KEY", "GEMINI_API_KEY"]
     }
   },
   "firestore": {
