@@ -12,22 +12,28 @@ import RhythmHero from '@/components/RhythmHero';
 // Tokens
 // ─────────────────────────────────────────────────────────────
 const tokens = (dark: boolean) => ({
-  bg: dark ? '#0a0a0a' : '#FAF8F5',
-  bgGradient: dark ? '#0a0a0a' : '#FAF8F5',
-  surface: dark ? '#161618' : '#ffffff',
-  surface2: dark ? '#1f1f22' : '#EBE6DC',
-  surfaceElev: dark ? '#262629' : '#ffffff',
-  border: dark ? 'rgba(255,255,255,0.07)' : 'rgba(37,37,37,0.08)',
-  borderStrong: dark ? 'rgba(255,255,255,0.14)' : 'rgba(37,37,37,0.14)',
-  text: dark ? '#f4f1ec' : '#252525',
-  textMuted: dark ? '#8a8580' : '#77716B',
-  textDim: dark ? '#56524c' : '#A39C94',
-  accent: '#F25545',         // coral red
+  bg: dark ? '#131313' : '#FAF8F5',
+  bgGradient: dark ? '#131313' : '#FAF8F5',
+  surface: dark ? '#201f1f' : '#ffffff',
+  surface2: dark ? '#1c1b1b' : '#EBE6DC',
+  surfaceElev: dark ? '#2a2a2a' : '#ffffff',
+  border: dark ? 'rgba(255,255,255,0.05)' : 'rgba(37,37,37,0.08)',
+  borderStrong: dark ? 'rgba(255,255,255,0.1)' : 'rgba(37,37,37,0.14)',
+  text: dark ? '#e5e2e1' : '#252525',
+  textMuted: dark ? '#a98a83' : '#77716B',
+  textDim: dark ? '#5a413b' : '#A39C94',
+  accent: '#ef5a3a',
   accentDeep: '#C43425',
-  accentSoft: dark ? 'rgba(242,85,69,0.13)' : 'rgba(242,85,69,0.08)',
+  accentSoft: dark ? 'rgba(239,90,58,0.13)' : 'rgba(242,85,69,0.08)',
   accentText: dark ? '#f5b8a8' : '#C43425',
-  good: '#5dd39e',
-  goodSoft: dark ? 'rgba(93,211,158,0.13)' : 'rgba(93,211,158,0.14)',
+  accentGlow: '0 0 20px rgba(246,95,62,0.2)',
+  good: '#4edea3',
+  goodSoft: dark ? 'rgba(78,222,163,0.14)' : 'rgba(93,211,158,0.14)',
+  glassBackground: dark ? 'rgba(28,27,27,0.6)' : '#ffffff',
+  glassBlur: dark ? 'blur(12px)' : 'none',
+  navBackground: dark ? 'rgba(32,31,31,0.9)' : 'rgba(250,248,245,0.95)',
+  navBorder: dark ? 'rgba(255,255,255,0.1)' : 'rgba(37,37,37,0.1)',
+  navShadow: dark ? '0 -8px 20px rgba(246,95,62,0.15)' : '0 -4px 16px rgba(0,0,0,0.06)',
   mono: 'var(--font-mono, monospace)',
   font: 'var(--font-sans, sans-serif)',
   serif: 'var(--font-serif, Georgia, serif)',
@@ -319,17 +325,21 @@ const DrumNotation: React.FC<DrumNotationProps> = ({ color = '#f5f5f7', width = 
 function SectionLabel({ children, t, color }: { children: React.ReactNode; t: ThemeTokens; color?: string }) {
   return (
     <div style={{
-      fontFamily: t.font, fontSize: 11, fontWeight: 600, letterSpacing: 1.8,
+      fontFamily: t.font, fontSize: 10.5, fontWeight: 700, letterSpacing: 2,
       textTransform: 'uppercase', color: color || t.textMuted, marginBottom: 12,
     }}>{children}</div>
   );
 }
 
-function Card({ children, t, style = {}, onClick, padding = 18 }: { children: React.ReactNode; t: ThemeTokens; style?: React.CSSProperties; onClick?: () => void; padding?: number }) {
+function Card({ children, t, style = {}, onClick, padding = 18, className = '' }: { children: React.ReactNode; t: ThemeTokens; style?: React.CSSProperties; onClick?: () => void; padding?: number; className?: string }) {
   return (
-    <div onClick={onClick} style={{
-      background: t.surface, border: `1px solid ${t.border}`,
+    <div className={className} onClick={onClick} style={{
+      background: t.glassBackground,
+      backdropFilter: t.glassBlur,
+      WebkitBackdropFilter: t.glassBlur,
+      border: `1px solid ${t.border}`,
       borderRadius: 20, padding, cursor: onClick ? 'pointer' : 'default',
+      transition: 'border-color 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
       ...style,
     }}>{children}</div>
   );
@@ -360,19 +370,30 @@ function Progress({ pct, t, h = 6, color }: { pct: number; t: ThemeTokens; h?: n
   );
 }
 
-function CTA({ children, t, onClick, variant = 'primary', icon }: { children: React.ReactNode; t: ThemeTokens; onClick?: () => void; variant?: 'primary' | 'secondary'; icon?: React.ReactNode }) {
+function CTA({ children, t, onClick, variant = 'primary', icon, className = '' }: { children: React.ReactNode; t: ThemeTokens; onClick?: () => void; variant?: 'primary' | 'secondary'; icon?: React.ReactNode; className?: string }) {
   const isPrimary = variant === 'primary';
+  const [pressed, setPressed] = React.useState(false);
   return (
-    <button onClick={onClick} style={{
-      width: '100%', padding: '16px 18px', borderRadius: 999,
-      background: isPrimary ? t.accent : 'transparent',
-      color: isPrimary ? '#fff' : t.text,
-      border: isPrimary ? 'none' : `1px solid ${t.borderStrong}`,
-      fontFamily: t.font, fontSize: 13, fontWeight: 700,
-      letterSpacing: 2, textTransform: 'uppercase',
-      cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8,
-      boxShadow: isPrimary ? '0 8px 24px rgba(239,90,58,0.3)' : 'none',
-    }}>
+    <button
+      className={className}
+      onClick={onClick}
+      onMouseDown={() => setPressed(true)}
+      onMouseUp={() => setPressed(false)}
+      onMouseLeave={() => setPressed(false)}
+      onTouchStart={() => setPressed(true)}
+      onTouchEnd={() => setPressed(false)}
+      style={{
+        width: '100%', padding: '16px 18px', borderRadius: 12,
+        background: isPrimary ? t.accent : 'transparent',
+        color: isPrimary ? '#fff' : t.text,
+        border: isPrimary ? 'none' : `1px solid ${t.borderStrong}`,
+        fontFamily: t.font, fontSize: 13, fontWeight: 700,
+        letterSpacing: 1.4, textTransform: 'uppercase',
+        cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+        boxShadow: isPrimary ? `0 8px 24px rgba(239,90,58,0.35), ${t.accentGlow}` : 'none',
+        transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+        transform: pressed ? 'scale(0.96)' : 'scale(1)',
+      }}>
       {icon}{children}
     </button>
   );
@@ -480,7 +501,7 @@ function OnboardingScreen({ t, onStart }: { t: ThemeTokens; dark: boolean; onSta
           {language === 'da' ? 'Uanset dit niveau, hjælper vi dig med at blive en bedre trommeslager.' : language === 'en' ? 'No matter your level, we help you become a better drummer.' : language === 'de' ? 'Egal welches Niveau, wir helfen dir ein besserer Schlagzeuger zu werden.' : 'No importa tu nivel, te ayudamos a convertirte en un mejor baterista.'}
         </div>
 
-        <CTA t={t} onClick={onStart}>{language === 'da' ? 'Kom i gang' : language === 'en' ? 'Get Started' : language === 'de' ? 'Loslegen' : 'Comenzar'}</CTA>
+        <CTA t={t} onClick={onStart} className="active-pulse">{language === 'da' ? 'Kom i gang' : language === 'en' ? 'Get Started' : language === 'de' ? 'Loslegen' : 'Comenzar'}</CTA>
 
         <div style={{ textAlign: 'center', marginTop: 16 }}>
           <button onClick={onStart} style={{
@@ -515,34 +536,39 @@ function HomeScreen({ t, dark, setDark, onSelectCategory, onOpenCoach, onPlayRhy
   return (
     <div style={{ padding: '8px 20px 40px', color: t.text, fontFamily: t.font }}>
       {/* Top bar with Greeting and theme/coach toggle */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{ fontSize: 24 }}>👋</span>
-            <span style={{ fontFamily: t.serif, fontStyle: 'italic', fontSize: 24, fontWeight: 'normal' }}>{greeting}, {displayName}</span>
+          <span style={{ fontFamily: t.serif, fontStyle: 'italic', fontSize: 22, fontWeight: 'normal', color: t.text }}>
+            {greeting}, {displayName}
+          </span>
+          <div style={{ fontSize: 11, color: t.textMuted, marginTop: 3, letterSpacing: 0.2 }}>{todayStr}</div>
+          {/* Streak chip */}
+          <div style={{
+            marginTop: 8, display: 'inline-flex', alignItems: 'center', gap: 5,
+            background: t.accentSoft, border: `1px solid ${t.accentSoft}`,
+            padding: '4px 10px', borderRadius: 999,
+          }}>
+            <IcFlame size={13} color={t.accent} />
+            <span style={{ fontSize: 11, fontWeight: 700, color: t.accent, letterSpacing: 0.3 }}>
+              {streak} {streak === 1 ? 'dag' : 'dage'} i træk
+            </span>
           </div>
-          <div style={{ fontSize: 12, color: t.textMuted, marginTop: 4 }}>{todayStr}</div>
-          
           {/* Flag language switcher */}
-          <div style={{ display: 'flex', gap: 6, marginTop: 8 }}>
+          <div style={{ display: 'flex', gap: 5, marginTop: 8 }}>
             {[
               { code: 'da', flag: '🇩🇰' },
               { code: 'en', flag: '🇬🇧' },
               { code: 'de', flag: '🇩🇪' },
               { code: 'es', flag: '🇪🇸' }
             ].map(l => (
-              <button 
-                key={l.code} 
+              <button
+                key={l.code}
                 onClick={() => setLanguage(l.code as any)}
                 style={{
                   background: language === l.code ? t.accentSoft : 'transparent',
                   border: `1px solid ${language === l.code ? t.accent : 'transparent'}`,
-                  borderRadius: 6,
-                  padding: '2px 5px',
-                  fontSize: 13,
-                  cursor: 'pointer',
-                  transition: 'all 0.15s',
-                  lineHeight: 1
+                  borderRadius: 6, padding: '2px 5px',
+                  fontSize: 13, cursor: 'pointer', transition: 'all 0.15s', lineHeight: 1,
                 }}
               >
                 {l.flag}
@@ -552,18 +578,21 @@ function HomeScreen({ t, dark, setDark, onSelectCategory, onOpenCoach, onPlayRhy
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
           <button onClick={() => setDark(!dark)} style={{
-            width: 38, height: 38, borderRadius: '50%', background: t.surface,
-            border: `1px solid ${t.border}`, color: t.text, cursor: 'pointer',
-            display: 'flex', alignItems: 'center', justifyContent: 'center'
+            width: 36, height: 36, borderRadius: '50%',
+            background: t.glassBackground, backdropFilter: t.glassBlur,
+            border: `1px solid ${t.border}`, color: t.textMuted, cursor: 'pointer',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>
-            {dark ? <IcSun size={16} /> : <IcMoon size={16} />}
+            {dark ? <IcSun size={15} /> : <IcMoon size={15} />}
           </button>
           <button onClick={onOpenCoach} style={{
-            width: 38, height: 38, borderRadius: '50%', background: t.surface,
-            border: `1px solid ${t.border}`, color: t.text, cursor: 'pointer',
-            display: 'flex', alignItems: 'center', justifyContent: 'center'
+            width: 36, height: 36, borderRadius: '50%',
+            background: t.accentSoft,
+            border: `1px solid ${t.accent}40`, cursor: 'pointer',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            boxShadow: t.accentGlow,
           }}>
-            <IcSpark size={16} color={t.accent} />
+            <IcSpark size={15} color={t.accent} />
           </button>
         </div>
       </div>
@@ -571,22 +600,32 @@ function HomeScreen({ t, dark, setDark, onSelectCategory, onOpenCoach, onPlayRhy
       {/* Dagens anbefaling */}
       <div style={{ marginBottom: 28 }}>
         <SectionLabel t={t}>{language === 'da' ? 'Dagens anbefaling' : language === 'en' ? "Today's recommendation" : language === 'de' ? 'Tagesempfehlung' : 'Recomendación del día'}</SectionLabel>
-        <TiltCard style={{ borderRadius: '18px' }}>
-          <Card t={t} padding={20} style={{ borderLeft: `4px solid ${t.accent}` }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
-              <div>
-                <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase', color: t.textMuted }}>
-                  {language === 'da' ? 'DAGENS ØVELSE' : language === 'en' ? 'DAILY EXERCISE' : language === 'de' ? 'TÄGLICHE ÜBUNG' : 'EJERCICIO DIARIO'}
-                </span>
-                <div style={{ fontFamily: t.serif, fontStyle: 'italic', fontSize: 20, marginTop: 2, color: t.text }}>Paradiddle Grooves</div>
-                <div style={{ fontSize: 12, color: t.textMuted, marginTop: 4 }}>
-                  12 min · {language === 'da' ? 'Let øvet' : language === 'en' ? 'Intermediate' : language === 'de' ? 'Mittelstufe' : 'Intermedio'}
+        <TiltCard style={{ borderRadius: '20px' }}>
+          <Card t={t} padding={20} style={{
+            borderLeft: `3px solid ${t.accent}`,
+            position: 'relative', overflow: 'hidden',
+          }}>
+            {/* Radial glow backdrop */}
+            <div style={{
+              position: 'absolute', top: -40, right: -40, width: 160, height: 160,
+              borderRadius: '50%', background: t.accent, filter: 'blur(70px)', opacity: 0.12, pointerEvents: 'none',
+            }} />
+            <div style={{ position: 'relative' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
+                <div>
+                  <span style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: 1.4, textTransform: 'uppercase', color: t.accent }}>
+                    {language === 'da' ? 'DAGENS ØVELSE' : language === 'en' ? 'DAILY EXERCISE' : language === 'de' ? 'TÄGLICHE ÜBUNG' : 'EJERCICIO DIARIO'}
+                  </span>
+                  <div style={{ fontFamily: t.serif, fontStyle: 'italic', fontSize: 20, marginTop: 4, color: t.text }}>Paradiddle Grooves</div>
+                  <div style={{ fontSize: 12, color: t.textMuted, marginTop: 4 }}>
+                    12 min · {language === 'da' ? 'Let øvet' : language === 'en' ? 'Intermediate' : language === 'de' ? 'Mittelstufe' : 'Intermedio'}
+                  </div>
                 </div>
               </div>
+              <CTA t={t} onClick={() => onSelectCategory('grooves')}>
+                {language === 'da' ? 'Fortsæt' : language === 'en' ? 'Continue' : language === 'de' ? 'Weiter' : 'Continuar'}
+              </CTA>
             </div>
-            <CTA t={t} onClick={() => onSelectCategory('grooves')}>
-              {language === 'da' ? 'Fortsæt' : language === 'en' ? 'Continue' : language === 'de' ? 'Weiter' : 'Continuar'}
-            </CTA>
           </Card>
         </TiltCard>
       </div>
@@ -600,17 +639,21 @@ function HomeScreen({ t, dark, setDark, onSelectCategory, onOpenCoach, onPlayRhy
             { id: 'nodelære' as const, title: translate('musicTheory'), desc: translate('theoryDesc'), icon: <IcMetro size={20} /> },
             { id: 'grooves' as const, title: translate('grooves'), desc: translate('groovesDesc'), icon: <TabKit size={20} color={t.accent} /> },
             { id: 'playalong' as const, title: translate('playalong'), desc: translate('playalongDesc'), icon: <TabPlayalong size={20} color={t.accent} /> }
-          ].map((cat) => (
-            <TiltCard key={cat.id} onClick={() => onSelectCategory(cat.id)} style={{ borderRadius: '18px' }}>
+          ].map((cat, i) => (
+            <TiltCard key={cat.id} onClick={() => onSelectCategory(cat.id)} style={{ borderRadius: '18px' }} className={`stagger-item d-${Math.min(i * 80, 480)}`}>
               <div style={{
-                background: t.surface, border: `1px solid ${t.border}`,
+                background: t.glassBackground,
+                backdropFilter: t.glassBlur,
+                WebkitBackdropFilter: t.glassBlur,
+                border: `1px solid ${t.border}`,
                 borderRadius: 18, padding: '16px 18px', display: 'flex', alignItems: 'center', gap: 16,
-                cursor: 'pointer', transition: 'border-color 0.2s', height: '100%'
+                cursor: 'pointer', transition: 'border-color 0.2s', height: '100%',
               }}>
                 <div style={{
                   width: 44, height: 44, borderRadius: 12,
                   background: t.accentSoft, color: t.accent, flexShrink: 0,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center'
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  boxShadow: `0 4px 12px ${t.accentSoft}`,
                 }}>
                   {cat.icon}
                 </div>
@@ -618,7 +661,7 @@ function HomeScreen({ t, dark, setDark, onSelectCategory, onOpenCoach, onPlayRhy
                   <div style={{ fontFamily: t.serif, fontStyle: 'italic', fontSize: 18, color: t.text }}>{cat.title}</div>
                   <div style={{ fontSize: 12, color: t.textMuted, marginTop: 2, lineHeight: 1.3 }}>{cat.desc}</div>
                 </div>
-                <IcChev size={16} color={t.textDim} />
+                <IcChev size={15} color={t.textDim} />
               </div>
             </TiltCard>
           ))}
@@ -630,16 +673,22 @@ function HomeScreen({ t, dark, setDark, onSelectCategory, onOpenCoach, onPlayRhy
         <SectionLabel t={t}>{language === 'da' ? 'Din progression' : language === 'en' ? 'Your Progression' : language === 'de' ? 'Dein Fortschritt' : 'Tu progresión'}</SectionLabel>
         <TiltCard style={{ borderRadius: '16px' }}>
           <div style={{
-            background: t.surface, border: `1px solid ${t.border}`,
-            borderRadius: 16, padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            background: t.glassBackground,
+            backdropFilter: t.glassBlur,
+            WebkitBackdropFilter: t.glassBlur,
+            border: `1px solid ${t.border}`,
+            borderRadius: 16, padding: '14px 16px',
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12,
           }}>
-            <div style={{ fontSize: 13, color: t.text }}>
+            <div style={{ fontSize: 12, color: t.text, lineHeight: 1.5 }}>
               {language === 'da' ? 'Denne uge' : language === 'en' ? 'This week' : language === 'de' ? 'Diese Woche' : 'Esta semana'}:{' '}
-              <span style={{ fontWeight: 600 }}>3 {language === 'da' ? 'øvedage' : language === 'en' ? 'practice days' : language === 'de' ? 'Übungstage' : 'días de práctica'}</span> ·{' '}
-              <span style={{ fontWeight: 600 }}>72 min</span> ·{' '}
+              <span style={{ fontWeight: 600, color: t.accent }}>3 {language === 'da' ? 'øvedage' : language === 'en' ? 'practice days' : language === 'de' ? 'Übungstage' : 'días de práctica'}</span>
+              {' · '}
+              <span style={{ fontWeight: 600 }}>72 min</span>
+              {' · '}
               <span style={{ fontWeight: 600 }}>{translate('level')} {level}</span>
             </div>
-            <div style={{ width: 60 }}><Progress pct={xpPct} t={t} h={6} /></div>
+            <div style={{ width: 60, flexShrink: 0 }}><Progress pct={xpPct} t={t} h={5} /></div>
           </div>
         </TiltCard>
       </div>
@@ -831,7 +880,7 @@ function PracticeScreen({ t, onSelectCategory, onPlayRhythmHero }: PracticeScree
                 padding: '8px 14px', borderRadius: 999, border: `1px solid ${active ? t.accent : t.border}`,
                 background: active ? t.accentSoft : t.surface, color: active ? t.accent : t.textMuted,
                 fontFamily: t.font, fontSize: 12, fontWeight: 600, cursor: 'pointer',
-                whiteSpace: 'nowrap', transition: 'all 0.15s ease'
+                whiteSpace: 'nowrap', transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)'
               }}>{chip.label}</button>
             );
           })}
@@ -1149,7 +1198,7 @@ function MobileCategoryDetail({ t, category, onClose, onOpenCoach }: MobileCateg
                 padding: '6px 12px', borderRadius: 999, border: `1px solid ${active ? t.accent : t.border}`,
                 background: active ? t.accentSoft : t.surface, color: active ? t.accent : t.textMuted,
                 fontFamily: t.font, fontSize: 11, fontWeight: 600, cursor: 'pointer',
-                whiteSpace: 'nowrap', transition: 'all 0.15s ease'
+                whiteSpace: 'nowrap', transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)'
               }}>{chip}</button>
             );
           })}
@@ -1203,7 +1252,7 @@ function MobileCategoryDetail({ t, category, onClose, onOpenCoach }: MobileCateg
                 <button onClick={() => setMetroPlaying(!metroPlaying)} style={{
                   width: 40, height: 40, borderRadius: '50%', background: t.accent, border: 'none', color: '#fff',
                   cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  boxShadow: '0 4px 12px rgba(242,85,69,0.3)', transition: 'all 0.15s ease'
+                  boxShadow: '0 4px 12px rgba(242,85,69,0.3)', transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)'
                 }}>
                   {metroPlaying ? <span style={{ fontSize: 12 }}>◼</span> : <IcPlay size={12} fill color="#fff" />}
                 </button>
@@ -1443,7 +1492,7 @@ function TrackDetail({ t, trackId, onClose, onOpenLesson, onOpenCoach }: TrackDe
             borderRadius: 18, overflow: 'hidden',
           }}>
             {lessonList.map((l, i) => (
-              <div key={i} onClick={() => !l.locked && onOpenLesson(`${track.id}-${l.n}`)} style={{
+              <div key={i} className={`stagger-item d-${Math.min(i * 80, 480)}`} onClick={() => !l.locked && onOpenLesson(`${track.id}-${l.n}`)} style={{
                 display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px',
                 borderBottom: i < lessonList.length - 1 ? `1px solid ${t.border}` : 'none',
                 opacity: l.locked ? 0.45 : 1,
@@ -1490,7 +1539,7 @@ function TrackDetail({ t, trackId, onClose, onOpenLesson, onOpenCoach }: TrackDe
         padding: '12px 20px 30px', borderTop: `1px solid ${t.border}`,
         background: t.bg,
       }}>
-        <CTA t={t} onClick={() => onOpenLesson(`${track.id}-4`)} icon={<IcPlay size={13} fill color="#fff"/>}>
+        <CTA t={t} onClick={() => onOpenLesson(`${track.id}-4`)} className="active-pulse" icon={<IcPlay size={13} fill color="#fff"/>}>
           {track.progress > 0 ? 'Fortsæt forløb' : 'Start forløb'}
         </CTA>
       </div>
@@ -1690,7 +1739,7 @@ function LessonDetail({ t, onClose, onOpenCoach }: LessonDetailProps) {
               {exercises.map((ex, i) => {
                 const isNext = !ex.done && exercises.findIndex(e => !e.done) === i;
                 return (
-                  <div key={i} style={{
+                  <div key={i} className={`stagger-item d-${Math.min(i * 80, 480)}`} style={{
                     background: t.surface, border: `1px solid ${isNext ? t.accent : t.border}`,
                     borderRadius: 16, padding: 14, display: 'flex', alignItems: 'center', gap: 14,
                     cursor: 'pointer',
@@ -2390,11 +2439,14 @@ function TabBar({ tab, onTab, t, dark, isMobile, onSelectCategory }: TabBarProps
   return (
     <div style={{
       position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 50,
-      paddingBottom: isMobile ? 'calc(env(safe-area-inset-bottom) + 8px)' : 24,
-      paddingTop: 14, paddingLeft: 0, paddingRight: 0,
-      background: dark
-        ? 'linear-gradient(to top, rgba(10,10,10,1) 50%, rgba(10,10,10,0.85) 80%, rgba(10,10,10,0))'
-        : 'linear-gradient(to top, rgba(250,248,245,1) 50%, rgba(250,248,245,0.85) 80%, rgba(250,248,245,0))',
+      paddingBottom: isMobile ? 'calc(env(safe-area-inset-bottom) + 8px)' : 20,
+      paddingTop: 12, paddingLeft: 0, paddingRight: 0,
+      background: t.navBackground,
+      backdropFilter: 'blur(20px)',
+      WebkitBackdropFilter: 'blur(20px)',
+      borderTop: `1px solid ${t.navBorder}`,
+      boxShadow: t.navShadow,
+      borderRadius: '16px 16px 0 0',
     }}>
       <div style={{
         display: 'flex', alignItems: 'center', padding: '0 4px',
@@ -2411,13 +2463,15 @@ function TabBar({ tab, onTab, t, dark, isMobile, onSelectCategory }: TabBarProps
               }
             }} style={{
               flex: 1, background: 'transparent', border: 'none', cursor: 'pointer',
-              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5,
+              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
               padding: '6px 0', fontFamily: t.font,
               color: active ? t.accent : t.textMuted,
+              transition: 'color 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
             }}>
-              <Icon size={24} color={active ? t.accent : t.textMuted} sw={active ? 1.8 : 1.4} />
+              <Icon size={22} color={active ? t.accent : t.textMuted} sw={active ? 2 : 1.4} />
               <span style={{
-                fontSize: 10, fontWeight: active ? 700 : 500, letterSpacing: 0.2,
+                fontSize: 9.5, fontWeight: active ? 700 : 500, letterSpacing: 0.8,
+                textTransform: 'uppercase',
               }}>{tt.label}</span>
             </button>
           );
@@ -2446,7 +2500,7 @@ function useFitScale(w: number, h: number, margin = 24) {
 }
 
 export default function MobilePrototype() {
-  const [dark, setDark] = useState(false);
+  const [dark, setDark] = useState(true);
   const [tab, setTab] = useState('home');
   const [trackId, setTrackId] = useState<string | null>(null);
   const [lessonId, setLessonId] = useState<string | null>(null);
@@ -2648,24 +2702,26 @@ export default function MobilePrototype() {
               overflow: 'auto',
               paddingBottom: 'calc(var(--safe-bottom) + 100px)',
             }}>
-              {tab === 'home' && (
-                <HomeScreen t={t} dark={dark} setDark={setDark}
-                  onSelectCategory={(id) => setSelectedCategory(id)}
-                  onOpenCoach={() => setCoachOpen(true)}
-                  onPlayRhythmHero={() => setRhythmHeroOpen(true)}
-                  guestXp={guestXp} />
-              )}
-              {tab === 'practice' && (
-                <PracticeScreen t={t} dark={dark} 
-                  onSelectCategory={(id) => setSelectedCategory(id)}
-                  onPlayRhythmHero={() => setRhythmHeroOpen(true)} />
-              )}
-              {tab === 'kit' && (
-                <StudioKitScreen t={t} dark={dark} onOpenPads={() => setPadsOpen(true)} />
-              )}
-              {tab === 'profile' && (
-                <ProfileScreen t={t} dark={dark} setDark={setDark} guestXp={guestXp} />
-              )}
+              <div key={tab} className="tab-content-enter">
+                {tab === 'home' && (
+                  <HomeScreen t={t} dark={dark} setDark={setDark}
+                    onSelectCategory={(id) => setSelectedCategory(id)}
+                    onOpenCoach={() => setCoachOpen(true)}
+                    onPlayRhythmHero={() => setRhythmHeroOpen(true)}
+                    guestXp={guestXp} />
+                )}
+                {tab === 'practice' && (
+                  <PracticeScreen t={t} dark={dark}
+                    onSelectCategory={(id) => setSelectedCategory(id)}
+                    onPlayRhythmHero={() => setRhythmHeroOpen(true)} />
+                )}
+                {tab === 'kit' && (
+                  <StudioKitScreen t={t} dark={dark} onOpenPads={() => setPadsOpen(true)} />
+                )}
+                {tab === 'profile' && (
+                  <ProfileScreen t={t} dark={dark} setDark={setDark} guestXp={guestXp} />
+                )}
+              </div>
             </div>
 
             {/* Tab bar */}

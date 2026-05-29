@@ -2,14 +2,25 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { auth, googleProvider } from './firebase';
-import { signInWithPopup, signOut, onAuthStateChanged } from 'firebase/auth';
+import {
+  signInWithPopup,
+  signOut,
+  onAuthStateChanged,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  sendPasswordResetEmail,
+  updateProfile,
+} from 'firebase/auth';
 import { firestoreService, UserProfile } from './firestoreService';
 import { UserPlan, getCompletedExercises, getUserPlan, saveUserPlan, setPremiumStatus } from './mockData';
 
 interface AuthContextType {
   user: UserProfile | null;
   loading: boolean;
-  login: (email?: string) => Promise<void>;
+  login: () => Promise<void>;
+  signUpWithEmail: (email: string, password: string, displayName: string) => Promise<void>;
+  signInWithEmail: (email: string, password: string) => Promise<void>;
+  resetPassword: (email: string) => Promise<void>;
   logout: () => Promise<void>;
   syncCompletedExercises: (completedIds: string[]) => Promise<void>;
   syncLearningPlan: (plan: UserPlan) => Promise<void>;
@@ -95,7 +106,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   // Login using Google popup
-  const login = async (email?: string) => {
+  const login = async () => {
     setLoading(true);
     try {
       await signInWithPopup(auth, googleProvider);
@@ -104,6 +115,43 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       throw err;
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Opret konto med email og password
+  const signUpWithEmail = async (email: string, password: string, displayName: string) => {
+    setLoading(true);
+    try {
+      const result = await createUserWithEmailAndPassword(auth, email, password);
+      await updateProfile(result.user, { displayName });
+    } catch (err) {
+      console.error('Email sign-up error:', err);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Log ind med email og password
+  const signInWithEmail = async (email: string, password: string) => {
+    setLoading(true);
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+    } catch (err) {
+      console.error('Email sign-in error:', err);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Nulstil kodeord
+  const resetPassword = async (email: string) => {
+    try {
+      await sendPasswordResetEmail(auth, email);
+    } catch (err) {
+      console.error('Password reset error:', err);
+      throw err;
     }
   };
 
@@ -170,6 +218,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       user,
       loading,
       login,
+      signUpWithEmail,
+      signInWithEmail,
+      resetPassword,
       logout,
       syncCompletedExercises,
       syncLearningPlan,

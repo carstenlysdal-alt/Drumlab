@@ -1,12 +1,12 @@
 'use client';
 
-import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   IcHome, IcSpark, IcUser, IcPlay, IcBack, IcChev, IcCheck, IcLock,
-  IcSun, IcMoon, IcSend, IcFlame, IcClock, IcTrophy, IcBell,
-  TabKit, TabPractice, IllSnare, IllKit, IllSticks, DrumNotation,
-  IcMetro, IcLoop, IcMin,
+  IcSun, IcMoon, IcSend, IcFlame, IcClock, IcTrophy,
+  TabKit, TabPractice, IllSnare, IllSticks, DrumNotation,
+  IcLoop, IcMin,
 } from '@/components/DesktopIcons';
 import {
   getUserPlan, getCompletedExercises,
@@ -19,7 +19,6 @@ import {
 import { useAuth } from '@/lib/authContext';
 import { useLanguage } from '@/lib/languageContext';
 import TiltCard from '@/components/TiltCard';
-import RhythmHero from '@/components/RhythmHero';
 
 
 // ─── DESIGN TOKENS ────────────────────────────────────────────
@@ -57,8 +56,8 @@ const Sect = ({ children, t, color, style = {} }: { children: React.ReactNode; t
   <div style={{ fontFamily: t.font, fontSize: 10.5, fontWeight: 700, letterSpacing: 1.8, textTransform: 'uppercase', color: color || t.textMuted, marginBottom: 14, ...style }}>{children}</div>
 );
 
-const Card = ({ children, t, style = {}, onClick, pad = 24 }: { children: React.ReactNode; t: T; style?: React.CSSProperties; onClick?: () => void; pad?: number }) => (
-  <div onClick={onClick} style={{ background: t.surface, border: `1px solid ${t.border}`, borderRadius: 18, padding: pad, cursor: onClick ? 'pointer' : 'default', transition: 'border-color 0.2s', ...style }}>
+const Card = ({ children, t, style = {}, onClick, pad = 24, className }: { children: React.ReactNode; t: T; style?: React.CSSProperties; onClick?: () => void; pad?: number; className?: string }) => (
+  <div onClick={onClick} className={className} style={{ background: t.surface, border: `1px solid ${t.border}`, borderRadius: 18, padding: pad, cursor: onClick ? 'pointer' : 'default', transition: 'border-color 0.2s', ...style }}>
     {children}
   </div>
 );
@@ -276,23 +275,46 @@ function Sidebar({ t, view, onView, selectedCategory, setSelectedCategory, isPre
         </div>
       )}
 
-      {/* User chip */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '14px 6px 0', borderTop: `1px solid ${t.border}`, marginTop: 12 }}>
-        {user?.photoURL ? (
-          <img src={user.photoURL} alt={user.displayName} style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover' }} />
+      {/* Auth / User chip */}
+      <div style={{ borderTop: `1px solid ${t.border}`, marginTop: 12, paddingTop: 14 }}>
+        {user ? (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '0 6px' }}>
+            {user.photoURL ? (
+              <img src={user.photoURL} alt={user.displayName} style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover' }} />
+            ) : (
+              <div style={{ width: 32, height: 32, borderRadius: '50%', background: t.accent, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 12, fontWeight: 700, flexShrink: 0 }}>
+                {user.displayName.split(' ').map((n: string) => n[0]).join('').toUpperCase().substring(0, 2)}
+              </div>
+            )}
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: 12, fontWeight: 600, color: t.text, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                {user.displayName}
+              </div>
+              <div style={{ fontSize: 10, color: t.textMuted, fontFamily: t.mono }}>
+                {translate('level')} {user.level || 1} · {isPremium ? 'PRO' : 'FREE'}
+              </div>
+            </div>
+          </div>
         ) : (
-          <div style={{ width: 32, height: 32, borderRadius: '50%', background: t.accent, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 12, fontWeight: 700 }}>
-            {user ? user.displayName.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2) : 'A'}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, padding: '0 6px' }}>
+            <a href="/login" style={{
+              display: 'block', textAlign: 'center', padding: '9px 12px',
+              background: t.accent, color: '#fff', borderRadius: 8,
+              fontSize: 11, fontWeight: 700, letterSpacing: 1.2, textTransform: 'uppercase',
+              textDecoration: 'none', boxShadow: '0 4px 14px rgba(239,90,58,0.35)',
+            }}>
+              Opret konto
+            </a>
+            <a href="/login" style={{
+              display: 'block', textAlign: 'center', padding: '8px 12px',
+              border: `1px solid ${t.borderStrong}`, color: t.textMuted, borderRadius: 8,
+              fontSize: 11, fontWeight: 600, letterSpacing: 1.2, textTransform: 'uppercase',
+              textDecoration: 'none',
+            }}>
+              Log ind
+            </a>
           </div>
         )}
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: 12, fontWeight: 600, color: t.text, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-            {user ? user.displayName : 'Trommeslager'}
-          </div>
-          <div style={{ fontSize: 10, color: t.textMuted, fontFamily: t.mono }}>
-            {translate('level')} {user?.level || 1} · {isPremium ? 'PRO' : 'FREE'}
-          </div>
-        </div>
       </div>
 
     </div>
@@ -475,7 +497,29 @@ function CoachPanel({ t, open, onToggle, isPremium, onUpgrade, onNavigate }: {
   );
 }
 
-function HomeView({ t, dark, setDark, onView, isPremium, onUpgrade, onSelectCategory, setRhythmHeroOpen }: {
+// ─── STREAK DOTS ──────────────────────────────────────────────
+function StreakDots({ active = 0, todayIndex = new Date().getDay() === 0 ? 6 : new Date().getDay() - 1, t }: { active?: number; todayIndex?: number; t: T }) {
+  const days = ['M', 'T', 'O', 'T', 'F', 'L', 'S'];
+  return (
+    <div style={{ display: 'flex', gap: 8 }}>
+      {days.map((d, i) => {
+        const on = i < active;
+        const isToday = i === todayIndex;
+        return (
+          <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+            <div className={`streak-dot${on ? ' on' : ''}${isToday ? ' today' : ''}`}>
+              {on ? <IcCheck size={11} sw={2.5} color="#fff" /> : null}
+            </div>
+            <span style={{ fontSize: 9, color: t.textMuted, fontWeight: 600, letterSpacing: 0.3, fontFamily: t.mono }}>{d}</span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// ─── HOME VIEW ────────────────────────────────────────────────
+function HomeView({ t, dark, setDark, onView, isPremium, onUpgrade, onSelectCategory }: {
   t: T;
   dark: boolean;
   setDark: (d: boolean) => void;
@@ -483,151 +527,153 @@ function HomeView({ t, dark, setDark, onView, isPremium, onUpgrade, onSelectCate
   isPremium: boolean;
   onUpgrade: () => void;
   onSelectCategory: (cat: 'opvarmning' | 'nodelære' | 'grooves' | 'playalong') => void;
-  setRhythmHeroOpen: (open: boolean) => void;
 }) {
   const { user } = useAuth();
   const { t: translate } = useLanguage();
   const today = new Date().toLocaleDateString('da-DK', { weekday: 'long', day: 'numeric', month: 'long' });
-  const displayName = user ? user.displayName : 'Anders';
-  
-  // Gamification states
-  const xp = user?.xp !== undefined ? user.xp : 120;
+  const displayName = user?.displayName || 'dig';
+
+  const xp = user?.xp !== undefined ? user.xp : 0;
   const level = user?.level || 1;
-  const streak = user?.streak !== undefined ? user.streak : 7;
+  const streak = user?.streak !== undefined ? user.streak : 0;
+  const xpToNext = 200 - (xp % 200);
   const xpPct = ((xp % 200) / 200) * 100;
+
+  const plan = getUserPlan();
+  const hasProject = !!plan;
+
+  const CATEGORIES = [
+    { id: 'opvarmning' as const, title: translate('warmup'), tagline: translate('warmupTagline'), icon: <IllSticks size={52} color={t.accent} /> },
+    { id: 'nodelære' as const, title: translate('musicTheory'), tagline: translate('theoryTagline'), icon: <div style={{ transform: 'scale(0.8)', marginTop: -20, marginBottom: -10 }}><DrumNotation color={t.text} width={140} accent={t.accent} active={2} /></div> },
+    { id: 'grooves' as const, title: translate('grooves'), tagline: translate('groovesTagline'), icon: <IllSnare size={62} color={t.accent} /> },
+    { id: 'playalong' as const, title: translate('playalong'), tagline: translate('playalongTagline'), icon: <div style={{ width: 42, height: 42, borderRadius: '50%', background: t.accentSoft, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><IcPlay size={20} fill color={t.accent} /></div> },
+  ];
 
   return (
     <div style={{ padding: '36px 44px 60px', color: t.text, fontFamily: t.font, maxWidth: 1100 }}>
-      {/* Greeting */}
-      <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 36 }}>
+      {/* Header */}
+      <div className="anim-fade-up d-0" style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 32 }}>
         <div>
-          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase', color: t.textMuted, marginBottom: 10 }}>
+          <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase', color: t.textMuted, marginBottom: 10, fontFamily: t.mono }}>
             {today.charAt(0).toUpperCase() + today.slice(1)}
           </div>
-          <Display t={t} size={48}>{translate('welcome')}, {displayName}</Display>
+          <Display t={t} size={48} style={{ lineHeight: 1 }}>
+            {hasProject ? `Velkommen tilbage, ${displayName}.` : 'Nu begynder dit projekt som trommeslager.'}
+          </Display>
+          {hasProject && plan && (
+            <div className="anim-fade-up d-160" style={{ fontSize: 14, color: t.textMuted, marginTop: 10 }}>
+              Næste skridt:{' '}
+              <span style={{ color: t.accent, fontWeight: 600 }}>
+                {plan.fokustema.replace(/^Uge \d+:\s*/, '')}
+              </span>
+            </div>
+          )}
         </div>
-        <div style={{ display: 'flex', gap: 8 }}>
-          <button onClick={() => setDark(!dark)} style={{ width: 38, height: 38, borderRadius: '50%', background: 'transparent', border: `1px solid ${t.border}`, color: t.textMuted, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            {dark ? <IcSun size={15} /> : <IcMoon size={15} />}
-          </button>
-          <button style={{ width: 38, height: 38, borderRadius: '50%', background: 'transparent', border: `1px solid ${t.border}`, color: t.textMuted, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
-            <IcBell size={15} />
-            <div style={{ position: 'absolute', top: 8, right: 8, width: 6, height: 6, borderRadius: '50%', background: t.accent }} />
-          </button>
-        </div>
+        <button onClick={() => setDark(!dark)} style={{ width: 38, height: 38, borderRadius: '50%', background: 'transparent', border: `1px solid ${t.border}`, color: t.textMuted, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+          {dark ? <IcSun size={15} /> : <IcMoon size={15} />}
+        </button>
       </div>
 
-      {/* Hero grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1.6fr 1fr', gap: 20, marginBottom: 36 }}>
-        {/* Recommended Daily Exercise */}
-        <TiltCard style={{ borderRadius: '18px' }}>
-          <Card t={t} pad={0} style={{ overflow: 'hidden', display: 'flex', borderLeft: `4px solid ${t.accent}`, height: '100%' }}>
-            <div style={{ padding: 28, flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-              <div>
-                <Sect t={t} color={t.accent}>Dagens anbefaling</Sect>
-                <Display t={t} size={30} style={{ marginBottom: 8 }}>Paradiddle Grooves</Display>
-                <div style={{ fontSize: 11, color: t.textMuted, fontFamily: t.mono, letterSpacing: 0.5, marginBottom: 12 }}>12 MIN · LET ØVET</div>
-                <p style={{ fontSize: 13, color: t.textMuted, lineHeight: 1.5, margin: '0 0 16px' }}>
-                  Styrk din koordination, fingerkontrol og balance på trommerne med dagens fokuserede paradiddle-grooves.
-                </p>
-              </div>
-              <div>
-                <Btn t={t} onClick={() => onSelectCategory('grooves')} icon={<IcPlay size={11} />}>Start dagens øvelse</Btn>
-              </div>
-            </div>
-            <div style={{ width: 180, position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', background: dark ? '#101012' : '#F3EFE7', borderLeft: `1px solid ${t.border}`, flexShrink: 0 }}>
-              <IllSnare size={130} color={t.accent} sw={1.4} />
-            </div>
-          </Card>
-        </TiltCard>
-
-        {/* Weekly Progression / Gamification Dashboard */}
-        <TiltCard style={{ borderRadius: '18px' }}>
-          <Card t={t} pad={24} style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', height: '100%' }}>
-            <div>
-              <Sect t={t}>{translate('dailyQuests')}</Sect>
-              <div style={{ fontSize: 18, fontWeight: 700, color: t.text, marginBottom: 12, fontFamily: t.font }}>
-                🔥 {streak} {translate('streakActive')}
-              </div>
-              
-              {/* Daily Quests Checklist */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 16 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: t.textMuted }}>
-                  <input type="checkbox" defaultChecked disabled style={{ accentColor: t.accent }} />
-                  <span>Spil i Studio Kit i 5 min (Fuldført)</span>
+      {hasProject ? (
+        <>
+          {/* Streak + XP row */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: 16, marginBottom: 20 }}>
+            {/* Streak card with dots */}
+            <Card t={t} pad={22} style={{}} className="anim-fade-up d-240">
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <IcFlame size={16} color={t.accent} />
+                  <span style={{ fontSize: 13, fontWeight: 600 }}>
+                    {streak} {streak === 1 ? 'dags' : 'dages'} streak
+                  </span>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: t.textMuted }}>
-                  <input type="checkbox" defaultChecked disabled style={{ accentColor: t.accent }} />
-                  <span>Øv en valgfri lektion (Fuldført)</span>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: t.text }}>
-                  <input type="checkbox" disabled style={{ accentColor: t.accent }} />
-                  <strong>Prøv Rytmehelt minispillet! (+50 XP)</strong>
-                </div>
+                <span style={{ fontFamily: t.mono, fontSize: 9, color: t.textMuted, letterSpacing: 0.5, textTransform: 'uppercase' }}>
+                  Uge {Math.ceil(new Date().getDate() / 7) + (new Date().getMonth() > 0 ? 4 : 0)}
+                </span>
               </div>
-            </div>
-            
-            <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: t.textMuted, marginBottom: 6, fontFamily: t.mono, fontWeight: 600, letterSpacing: 0.5 }}>
-                <span>{translate('level')} {level} PROGRESSION</span><span>{xp % 200} / 200 XP</span>
-              </div>
-              <Prog pct={xpPct} t={t} h={6} />
-              
-              <button 
-                onClick={() => setRhythmHeroOpen(true)}
-                style={{
-                  marginTop: 16,
-                  width: '100%',
-                  background: 'rgba(242,85,69,0.1)',
-                  border: '1px dashed #f25545',
-                  color: '#f25545',
-                  borderRadius: 10,
-                  padding: '10px',
-                  fontSize: 11,
-                  fontWeight: 700,
-                  letterSpacing: 1,
-                  textTransform: 'uppercase',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: 6,
-                  transition: 'background 0.2s'
-                }}
-                onMouseOver={(e) => e.currentTarget.style.background = 'rgba(242,85,69,0.18)'}
-                onMouseOut={(e) => e.currentTarget.style.background = 'rgba(242,85,69,0.1)'}
-              >
-                🎮 {translate('rhythmHero')} (+XP)
-              </button>
-            </div>
-          </Card>
-        </TiltCard>
-      </div>
-
-      {/* Choose practice category */}
-      <Sect t={t} style={{ marginBottom: 18 }}>Vælg øvespor</Sect>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16, marginBottom: 40 }}>
-        {[
-          { id: 'opvarmning' as const, title: translate('warmup'), desc: translate('warmupDesc'), icon: <IllSticks size={52} color={t.accent} /> },
-          { id: 'nodelære' as const, title: translate('musicTheory'), desc: translate('theoryDesc'), icon: <div style={{ transform: 'scale(0.8)', marginTop: -20, marginBottom: -10 }}><DrumNotation color={t.text} width={140} accent={t.accent} active={2} /></div> },
-          { id: 'grooves' as const, title: translate('grooves'), desc: translate('groovesDesc'), icon: <IllSnare size={62} color={t.accent} /> },
-          { id: 'playalong' as const, title: translate('playalong'), desc: translate('playalongDesc'), icon: <div style={{ width: 42, height: 42, borderRadius: '50%', background: t.accentSoft, display: 'flex', alignItems: 'center', justifyContent: 'center', color: t.accent }}><IcPlay size={20} fill color={t.accent} /></div> },
-        ].map((cat, i) => (
-          <TiltCard key={i} onClick={() => onSelectCategory(cat.id)} style={{ borderRadius: '18px' }}>
-            <Card t={t} pad={24} style={{ display: 'flex', alignItems: 'center', gap: 20, height: '100%' }}>
-              <div style={{ width: 80, height: 80, borderRadius: 14, background: t.sidebar, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', flexShrink: 0, border: `1px solid ${t.border}` }}>
-                {cat.icon}
-              </div>
-              <div style={{ flex: 1 }}>
-                <Display t={t} size={22} style={{ marginBottom: 6 }}>{cat.title}</Display>
-                <div style={{ fontSize: 13, color: t.textMuted, lineHeight: 1.4 }}>{cat.desc}</div>
-              </div>
-              <IcChev size={16} color={t.textDim} />
+              <StreakDots active={streak > 7 ? 7 : streak} t={t} />
             </Card>
-          </TiltCard>
+
+            {/* XP card */}
+            <Card t={t} pad={22} className="anim-fade-up d-320">
+              <Sect t={t} style={{ marginBottom: 10 }}>{translate('level')} {level}</Sect>
+              <Display t={t} size={28} style={{ marginBottom: 6 }}>{xpToNext} XP</Display>
+              <div style={{ fontSize: 11, color: t.textMuted, marginBottom: 14 }}>fra næste niveau</div>
+              <div className="bar anim-progress" style={{ height: 5 }}>
+                <i style={{ '--pct': xpPct + '%' } as React.CSSProperties} />
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 6, fontFamily: t.mono, fontSize: 9, color: t.textDim }}>
+                <span>NIV. {level} · {xp % 200} XP</span>
+                <span>NIV. {level + 1} · 200 XP</span>
+              </div>
+            </Card>
+          </div>
+
+          {/* Fortsæt projekt — primær handling */}
+          <div className={`card-lift anim-fade-up d-400`} onClick={() => onSelectCategory('grooves')} style={{
+            background: t.surface, border: `1px solid ${t.border}`,
+            borderRadius: 20, padding: 24, marginBottom: 24,
+            position: 'relative', overflow: 'hidden', cursor: 'pointer',
+          }}>
+            {/* Radial glow */}
+            <div style={{
+              position: 'absolute', top: -60, right: -60, width: 240, height: 240,
+              borderRadius: '50%', background: t.accent, filter: 'blur(90px)', opacity: 0.14, pointerEvents: 'none',
+            }} />
+            <div style={{ position: 'relative' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+                <span style={{ color: t.accent, fontSize: 11, fontWeight: 700, letterSpacing: 0.4 }}>Fortsæt projekt</span>
+                <span style={{ fontFamily: t.mono, fontSize: 10, color: t.textMuted }}>
+                  {plan?.fokustema?.split(':')[0] || 'Uge 1'}
+                </span>
+              </div>
+              <Display t={t} size={28} style={{ marginBottom: 4 }}>
+                {plan?.fokustema?.replace(/^Uge \d+:\s*/, '') || 'Grundlæggende færdigheder'}
+              </Display>
+              <div style={{ fontSize: 12, color: t.textMuted, marginBottom: 16 }}>Grooves & Timing</div>
+              <DrumNotation color={dark ? '#f4f1ec' : '#252525'} width={Math.min(600, 600)} accent={t.accent} active={2} />
+              <div className="bar" style={{ height: 4, marginTop: 16, marginBottom: 16 }}>
+                <i style={{ width: '27%' }} />
+              </div>
+              <Btn t={t} icon={<IcPlay size={12} />} size="lg">Fortsæt hvor du slap</Btn>
+            </div>
+          </div>
+        </>
+      ) : (
+        /* Ny bruger — ingen plan */
+        <div className="anim-fade-up d-160" style={{ marginBottom: 36 }}>
+          <div style={{ fontSize: 14, color: t.textMuted, lineHeight: 1.7, marginBottom: 28, maxWidth: 480 }}>
+            Vi husker hvor du er. Hvad du øver. Hvad der venter forude. Du behøver kun komme tilbage.
+          </div>
+          <div style={{ display: 'flex', gap: 12 }}>
+            <a href="/onboarding" style={{ display: 'inline-flex' }}>
+              <Btn t={t} size="lg" icon={<IcPlay size={13} />}>Start dit første projekt</Btn>
+            </a>
+            <Btn t={t} variant="secondary" size="lg" onClick={() => onSelectCategory('grooves')}>Udforsk øvespor</Btn>
+          </div>
+        </div>
+      )}
+
+      {/* Vælg øvespor */}
+      <Sect t={t} style={{ marginBottom: 18 }}>{translate('choosePracticeTrack')}</Sect>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 14, marginBottom: 40 }}>
+        {CATEGORIES.map((cat, i) => (
+          <div key={cat.id} className={`card-lift anim-fade-up d-${(i + 1) * 80}`} onClick={() => onSelectCategory(cat.id)} style={{
+            background: t.surface, border: `1px solid ${t.border}`,
+            borderRadius: 18, padding: 22,
+            display: 'flex', alignItems: 'center', gap: 18,
+          }}>
+            <div style={{ width: 72, height: 72, borderRadius: 14, background: t.sidebar, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', flexShrink: 0, border: `1px solid ${t.border}` }}>
+              {cat.icon}
+            </div>
+            <div style={{ flex: 1 }}>
+              <Display t={t} size={19} style={{ marginBottom: 4 }}>{cat.title}</Display>
+              <div style={{ fontSize: 12, color: t.textMuted, lineHeight: 1.4, fontStyle: 'italic' }}>{cat.tagline}</div>
+            </div>
+            <IcChev size={15} color={t.textDim} />
+          </div>
         ))}
       </div>
-
     </div>
   );
 }
@@ -643,6 +689,8 @@ interface CategoryDetailViewProps {
 
 function CategoryDetailView({ t, category, onBack }: CategoryDetailViewProps) {
   const [activeChip, setActiveChip] = useState('Alle');
+  const [openExerciseId, setOpenExerciseId] = useState<string | null>(null);
+  const [activeExTab, setActiveExTab] = useState<'beskrivelse' | 'noder'>('beskrivelse');
   const [bpm, setBpm] = useState(90);
   const [metroPlaying, setMetroPlaying] = useState(false);
   const [subdivision, setSubdivision] = useState<'quarter' | 'eighth'>('quarter');
@@ -882,8 +930,10 @@ function CategoryDetailView({ t, category, onBack }: CategoryDetailViewProps) {
             <button key={chip} onClick={() => setActiveChip(chip)} style={{
               padding: '8px 16px', borderRadius: 999, border: `1px solid ${active ? t.accent : t.border}`,
               background: active ? t.accentSoft : t.surface, color: active ? t.accent : t.textMuted,
-              fontFamily: t.font, fontSize: 12, fontWeight: 600, cursor: 'pointer',
-              whiteSpace: 'nowrap', transition: 'all 0.15s ease'
+              fontFamily: 'var(--font-title)', fontSize: 11, fontWeight: 700, cursor: 'pointer',
+              whiteSpace: 'nowrap', transition: 'all 0.15s ease',
+              letterSpacing: '0.12em',
+              boxShadow: active ? '0 0 14px rgba(242, 85, 69, 0.38)' : 'none',
             }}>{chip}</button>
           );
         })}
@@ -960,130 +1010,254 @@ function CategoryDetailView({ t, category, onBack }: CategoryDetailViewProps) {
         </Card>
       )}
 
-      {/* Interactive Backing Track Player for Play-along */}
-      {category === 'playalong' && (
-        <Card t={t} pad={24} style={{ marginBottom: 36, borderLeft: `4px solid ${t.accent}` }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20 }}>
-            <div>
-              <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1.5, textTransform: 'uppercase', color: t.accent, marginBottom: 4 }}>Tromme Backing Track Player</div>
-              <Display t={t} size={24}>Funk Groove Odyssey</Display>
-              <div style={{ fontSize: 12, color: t.textMuted, marginTop: 4 }}>105 BPM · Let øvet · Modalt loop</div>
+      {/* Play Along accordion queue */}
+      {category === 'playalong' && (() => {
+        const queue = [
+          { id: 1, title: 'Slow Rock i 78 BPM',    bpm: 78,  sections: ['INTRO', 'VERSE 1', 'CHORUS', 'BRIDGE', 'VERSE 2', 'OUTRO'] },
+          { id: 2, title: 'Funk Groove Odyssey',   bpm: 96,  sections: ['INTRO', 'FUNK 1', 'CHORUS', 'FILL', 'FUNK 2', 'OUTRO'] },
+          { id: 3, title: 'Halv-tempo Ballade',    bpm: 64,  sections: ['INTRO', 'VERSE', 'CHORUS', 'OUTRO'] },
+          { id: 4, title: 'Linear Groove i 100',   bpm: 100, sections: ['INTRO', 'GROOVE', 'BREAK', 'GROOVE', 'OUTRO'] },
+        ];
+        const activeQueueId = openExerciseId?.startsWith('pa-') ? parseInt(openExerciseId.replace('pa-', '')) : null;
+        return (
+          <div style={{ marginBottom: 36 }}>
+            <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 16 }}>
+              <Display t={t} size={26}>Play along</Display>
+              <span style={{ fontSize: 12, color: t.textMuted }}>{queue.length} numre i køen</span>
             </div>
-            <div style={{ display: 'flex', gap: 6 }}>
-              {([80, 90, 100, 110] as const).map(speed => (
-                <button key={speed} onClick={() => setPlayalongSpeed(speed)} style={{
-                  padding: '5px 10px', borderRadius: 4, border: `1.5px solid ${playalongSpeed === speed ? t.accent : t.border}`,
-                  background: playalongSpeed === speed ? t.accentSoft : 'transparent', color: playalongSpeed === speed ? t.accent : t.textMuted,
-                  fontSize: 10.5, fontFamily: t.mono, fontWeight: 700, cursor: 'pointer'
-                }}>{speed}%</button>
-              ))}
+            <div style={{ background: t.surface, border: `1px solid ${t.border}`, borderRadius: 18, overflow: 'hidden' }}>
+              {queue.map((tr, qi) => {
+                const isActive = activeQueueId === tr.id;
+                return (
+                  <div key={tr.id} style={{ borderBottom: qi < queue.length - 1 ? `1px solid ${t.border}` : 'none', background: isActive ? t.surface2 : 'transparent' }}>
+                    {/* Row header */}
+                    <button
+                      onClick={() => setOpenExerciseId(isActive ? null : `pa-${tr.id}`)}
+                      style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 14, padding: '14px 18px', border: 'none', background: 'transparent', cursor: 'pointer', textAlign: 'left' }}
+                    >
+                      <div style={{
+                        width: 40, height: 40, borderRadius: '50%', flexShrink: 0,
+                        background: 'radial-gradient(circle at 30% 30%, #ff7a4f, #c43425)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      }}>
+                        {isActive ? (
+                          <div className="wave-vis playing anim-wave">
+                            <span/><span/><span/><span/><span/>
+                          </div>
+                        ) : (
+                          <IcPlay size={14} fill color="#fff" />
+                        )}
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontSize: 14, fontWeight: 600, color: t.text }}>{tr.title}</div>
+                        <div style={{ fontFamily: t.mono, fontSize: 10, color: t.textMuted, marginTop: 2, letterSpacing: 0.5 }}>{tr.bpm} BPM · BACKING TRACK</div>
+                      </div>
+                      {!isActive && <IcChev size={13} color={t.textDim} />}
+                    </button>
+
+                    {/* Expanded player */}
+                    {isActive && (
+                      <div className="anim-fade-up d-0" style={{ padding: '0 18px 20px' }}>
+                        {/* Form timeline */}
+                        <div style={{ marginBottom: 18 }}>
+                          <div style={{ display: 'flex', gap: 4, marginBottom: 6 }}>
+                            {tr.sections.map((s, si) => (
+                              <span key={si} style={{ flex: 1, fontSize: 8, color: si === 1 ? t.accent : t.textMuted, fontWeight: 700, fontFamily: t.mono, letterSpacing: 0.3, textAlign: 'center' }}>{s}</span>
+                            ))}
+                          </div>
+                          <div style={{ position: 'relative', height: 8, borderRadius: 999, background: t.surface, overflow: 'visible' }}>
+                            <div style={{ width: '36%', height: '100%', borderRadius: 999, background: `linear-gradient(90deg, ${t.accent}, #ff7a4f)` }} />
+                            <div style={{ position: 'absolute', left: '36%', top: -3, width: 14, height: 14, borderRadius: '50%', background: '#fff', transform: 'translateX(-50%)', boxShadow: `0 0 0 3px ${t.accent}` }} />
+                          </div>
+                        </div>
+
+                        {/* Play button + time */}
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+                          <span style={{ fontFamily: t.mono, fontSize: 11, color: t.textMuted }}>1:32</span>
+                          <button
+                            onClick={() => setPlayalongPlaying(!playalongPlaying)}
+                            style={{ width: 54, height: 54, borderRadius: '50%', background: t.accent, border: 'none', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 24px rgba(242,85,69,0.35)' }}
+                          >
+                            {playalongPlaying ? <span style={{ fontSize: 18, lineHeight: 1 }}>◼</span> : <IcPlay size={20} fill color="#fff" />}
+                          </button>
+                          <span style={{ fontFamily: t.mono, fontSize: 11, color: t.textMuted }}>4:08</span>
+                        </div>
+
+                        {/* Guide drums slider */}
+                        <div style={{ marginBottom: 16 }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+                            <span style={{ fontSize: 12, fontWeight: 500, color: t.text }}>Guide-trommer</span>
+                            <span style={{ fontFamily: t.mono, fontSize: 11, color: t.textMuted }}>{mixerVols.drums}%</span>
+                          </div>
+                          <input type="range" min={0} max={100} value={mixerVols.drums} onChange={e => setMixerVols(prev => ({ ...prev, drums: +e.target.value }))} style={{ width: '100%', accentColor: t.accent }} />
+                        </div>
+
+                        {/* Backing track slider */}
+                        <div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+                            <span style={{ fontSize: 12, fontWeight: 500, color: t.text }}>Backing track</span>
+                            <span style={{ fontFamily: t.mono, fontSize: 11, color: t.textMuted }}>{mixerVols.music}%</span>
+                          </div>
+                          <input type="range" min={0} max={100} value={mixerVols.music} onChange={e => setMixerVols(prev => ({ ...prev, music: +e.target.value }))} style={{ width: '100%', accentColor: t.accent }} />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </div>
-
-          {/* Form timeline visualizer */}
-          <div style={{ marginBottom: 28 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, fontWeight: 700, color: t.textMuted, marginBottom: 8 }}>
-              <span>FORM FORLØB TIMELINE</span>
-              <span style={{ color: playalongBeat >= 28 && playalongBeat < 30 ? t.accent : t.textMuted }}>
-                {playalongBeat >= 28 && playalongBeat < 30 ? '⚠️ GØR KLAR TIL FILL CUE!' : 'Næste sektion: Chorus'}
-              </span>
-            </div>
-
-            {/* Timeline bars */}
-            <div style={{ display: 'flex', height: 28, borderRadius: 8, overflow: 'hidden', background: t.surface2, border: `1px solid ${t.border}`, position: 'relative' }}>
-              <div style={{ width: '25%', background: playalongBeat < 8 ? t.accentSoft : 'rgba(0,0,0,0.03)', borderRight: `1px solid ${t.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10.5, fontWeight: 600 }}>Intro (1)</div>
-              <div style={{ width: '50%', background: playalongBeat >= 8 && playalongBeat < 24 ? t.accentSoft : 'rgba(0,0,0,0.03)', borderRight: `1px solid ${t.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10.5, fontWeight: 600 }}>Verse (2)</div>
-              <div style={{ width: '12.5%', background: playalongBeat >= 24 && playalongBeat < 28 ? t.accentSoft : 'rgba(0,0,0,0.03)', borderRight: `1px solid ${t.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10.5, fontWeight: 600 }}>Chorus</div>
-              <div style={{ width: '6.25%', background: playalongBeat >= 28 && playalongBeat < 30 ? '#F2554533' : 'rgba(0,0,0,0.03)', borderRight: `1px solid ${t.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10.5, fontWeight: 700, color: t.accent }}>Fill</div>
-              <div style={{ width: '6.25%', background: playalongBeat >= 30 ? t.accentSoft : 'rgba(0,0,0,0.03)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10.5, fontWeight: 600 }}>Outro</div>
-
-              {/* Progress marker */}
-              {playalongPlaying && (
-                <div style={{
-                  position: 'absolute', top: 0, bottom: 0,
-                  left: `${(playalongBeat / 32) * 100}%`, width: 3, background: t.accent,
-                  boxShadow: '0 0 10px #F25545', transition: 'left 0.15s linear'
-                }} />
-              )}
-            </div>
-
-            {/* Prompt banner */}
-            <div style={{
-              marginTop: 12, padding: '10px 14px', borderRadius: 8,
-              background: playalongBeat >= 28 && playalongBeat < 30 ? t.accentSoft : t.surface,
-              border: `1px solid ${playalongBeat >= 28 && playalongBeat < 30 ? t.accent : t.border}`,
-              textAlign: 'center', fontSize: 13.5, fontWeight: 700,
-              color: playalongBeat >= 28 && playalongBeat < 30 ? t.accent : t.text
-            }}>
-              {playalongBeat < 8 && 'AKTIV: INTRO — Lyt til timingen og start roligt med fjerdedele.'}
-              {playalongBeat >= 8 && playalongBeat < 24 && 'AKTIV: VERS — Spil en stabil basic funk beat med ghost notes.'}
-              {playalongBeat >= 24 && playalongBeat < 28 && 'AKTIV: OMKVÆD (CHORUS) — Mere energi! Åbn hi-hatten.'}
-              {playalongBeat >= 28 && playalongBeat < 30 && 'FILL CUE — Spil et 16.-dels snare roll fill med et crash på 1!'}
-              {playalongBeat >= 30 && 'AKTIV: OUTRO — Dæmp energien og spil grooves mod slutningen.'}
-            </div>
-          </div>
-
-          {/* Controls Panel */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr 1fr', gap: 24, alignItems: 'center' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-              <button onClick={() => setPlayalongPlaying(!playalongPlaying)} style={{
-                width: 52, height: 52, borderRadius: '50%', background: t.accent, border: 'none', color: '#fff',
-                cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                boxShadow: '0 8px 24px rgba(242,85,69,0.35)'
-              }}>
-                {playalongPlaying ? <span style={{ fontSize: 16 }}>◼</span> : <IcPlay size={16} fill color="#fff" />}
-              </button>
-              <div>
-                <div style={{ fontSize: 13, fontWeight: 700 }}>{playalongPlaying ? 'Backing track spiller…' : 'Afspil backing track'}</div>
-                <div style={{ fontSize: 11, color: t.textMuted }}>BPM: {Math.round(105 * (playalongSpeed / 100))} (mål: 105)</div>
-              </div>
-            </div>
-
-            {/* Mixer drums volume */}
-            <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, fontWeight: 700, color: t.textMuted, marginBottom: 4 }}>
-                <span>GUIDE TROMMER</span>
-                <span style={{ fontFamily: t.mono }}>{mixerVols.drums}%</span>
-              </div>
-              <input type="range" min={0} max={100} value={mixerVols.drums} onChange={e => setMixerVols(prev => ({ ...prev, drums: +e.target.value }))} style={{ width: '100%', accentColor: t.accent }} />
-            </div>
-
-            {/* Mixer music volume */}
-            <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, fontWeight: 700, color: t.textMuted, marginBottom: 4 }}>
-                <span>BACKING TRACK</span>
-                <span style={{ fontFamily: t.mono }}>{mixerVols.music}%</span>
-              </div>
-              <input type="range" min={0} max={100} value={mixerVols.music} onChange={e => setMixerVols(prev => ({ ...prev, music: +e.target.value }))} style={{ width: '100%', accentColor: t.accent }} />
-            </div>
-          </div>
-        </Card>
-      )}
+        );
+      })()}
 
       {/* Grid of exercises */}
-      <Sect t={t}>Undervisning & Lektioner ({filteredExercises.length})</Sect>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16 }}>
-        {filteredExercises.map(ex => {
+      <Sect t={t}>Lektioner ({filteredExercises.length})</Sect>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        {filteredExercises.map((ex, idx) => {
+          const exKey = `${category}-${idx}`;
+          const isOpen = openExerciseId === exKey;
+          const isDone = idx < 2; // første to er "done" som demo
+          const isNext = !isDone && idx === 2;
+
           return (
-            <Card key={ex.id} t={t} pad={20} style={{ position: 'relative', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', minHeight: 140 }}>
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
-                  <Badge t={t} tone={ex.level === 'Begynder' ? 'good' : ex.level === 'Mellemniveau' ? 'default' : 'accent'}>{ex.level}</Badge>
-                  <span style={{ fontFamily: t.mono, fontSize: 11, color: t.textDim }}>{ex.dur} · {ex.bpm} BPM</span>
+            <div key={exKey} className="anim-fade-up" style={{
+              animationDelay: `${idx * 60}ms`,
+              borderRadius: 14, overflow: 'hidden',
+              border: `1px solid ${isOpen ? t.borderStrong : t.border}`,
+              transition: 'border-color 0.2s',
+            }}>
+              {/* Accordion header */}
+              <button
+                onClick={() => { if (!isOpen) setActiveExTab('beskrivelse'); setOpenExerciseId(isOpen ? null : exKey); }}
+                style={{
+                  width: '100%', background: isOpen ? t.surface2 : (isDone ? t.surface : t.surface),
+                  border: 'none', cursor: 'pointer', padding: '14px 18px',
+                  display: 'flex', alignItems: 'center', gap: 14,
+                  transition: 'background 0.2s', textAlign: 'left',
+                }}
+              >
+                {/* Status dot / number */}
+                <div style={{
+                  width: 34, height: 34, borderRadius: '50%', flexShrink: 0,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  background: isDone ? t.accent : isNext ? t.accentSoft : 'transparent',
+                  border: isDone ? 'none' : `1px solid ${t.borderStrong}`,
+                  color: isDone ? '#fff' : isNext ? t.accent : t.textMuted,
+                  fontFamily: t.mono, fontSize: 12, fontWeight: 700,
+                }}>
+                  {isDone ? <IcCheck size={14} sw={2.5} color="#fff" /> : <span>{idx + 1}</span>}
                 </div>
-                <div style={{ fontSize: 16, fontWeight: 700, color: t.text, marginBottom: 4 }}>{ex.title}</div>
-                <div style={{ fontSize: 12.5, color: t.textMuted }}>{ex.sub}</div>
-              </div>
-              
-              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 14 }}>
-                {ex.tags.map(tag => (
-                  <span key={tag} style={{
-                    padding: '3px 8px', borderRadius: 4, background: t.surface2, fontSize: 10,
-                    fontFamily: t.mono, color: t.textMuted
-                  }}>{tag}</span>
-                ))}
-              </div>
-            </Card>
+
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: t.text, marginBottom: 2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{ex.title}</div>
+                  <div style={{ fontSize: 11, color: isNext ? t.accent : t.textMuted, fontWeight: isNext ? 600 : 400 }}>
+                    {isNext ? 'Næste op' : ex.sub}
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+                  {isDone && <span style={{ fontFamily: t.mono, fontSize: 9, color: t.textMuted, letterSpacing: 0.5 }}>FÆRDIG</span>}
+                  {/* Content type badges */}
+                  <span className="content-badge">NODER</span>
+                  {/* Level badge: Niv. 0 / 1 / 2 */}
+                  <span className={`level-niv ${ex.level === 'Begynder' ? 'level-niv-0' : ex.level === 'Mellemniveau' ? 'level-niv-1' : 'level-niv-2'}`}>
+                    NIV. {ex.level === 'Begynder' ? 0 : ex.level === 'Mellemniveau' ? 1 : 2}
+                  </span>
+                  <div style={{ transform: isOpen ? 'rotate(90deg)' : 'none', transition: 'transform 0.2s' }}>
+                    <IcChev size={13} color={t.textDim} />
+                  </div>
+                </div>
+              </button>
+
+              {/* Accordion body */}
+              {isOpen && (
+                <div className="anim-fade-up d-0" style={{ background: t.surface2, borderTop: `1px solid ${t.border}` }}>
+                  {/* Tab navigation */}
+                  <div className="tab-nav">
+                    <button className={`tab-nav-btn${activeExTab === 'beskrivelse' ? ' tab-active' : ''}`}
+                      onClick={() => setActiveExTab('beskrivelse')}>
+                      Beskrivelse
+                    </button>
+                    <button className={`tab-nav-btn${activeExTab === 'noder' ? ' tab-active' : ''}`}
+                      onClick={() => setActiveExTab('noder')}>
+                      Noder
+                    </button>
+                  </div>
+
+                  {/* Tab content */}
+                  <div style={{ padding: '16px 18px 20px 66px' }}>
+                    {activeExTab === 'beskrivelse' && (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                        {/* Cinematic video player */}
+                        <div style={{
+                          aspectRatio: '16/9', borderRadius: 12, maxWidth: 460,
+                          background: t.bg, border: `1px solid ${t.border}`,
+                          position: 'relative', overflow: 'hidden',
+                        }}>
+                          {/* Background illustration */}
+                          <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0.1 }}>
+                            <IllSnare size={160} color={t.accent} sw={0.8} />
+                          </div>
+                          {/* Gradient overlay */}
+                          <div className="video-gradient-overlay" style={{ position: 'absolute', inset: 0 }} />
+                          {/* Video controls overlay */}
+                          <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', padding: '12px 14px' }}>
+                            {/* Progress track */}
+                            <div style={{ width: '100%', height: 4, background: 'rgba(255,255,255,0.18)', borderRadius: 999, position: 'relative', marginBottom: 10 }}>
+                              <div className="progress-bar-hit" style={{
+                                position: 'absolute', left: 0, top: 0, height: '100%', width: 0,
+                                background: t.accent, borderRadius: 999,
+                              }} />
+                            </div>
+                            {/* Controls row */}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                              <button className="active-glow" style={{
+                                width: 36, height: 36, borderRadius: '50%',
+                                background: t.accent, border: 'none', cursor: 'pointer',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                              }}>
+                                <IcPlay size={13} fill color="#fff" />
+                              </button>
+                              <span style={{ fontFamily: t.mono, fontSize: 10, color: 'rgba(255,255,255,0.65)' }}>
+                                0:00 / {ex.dur}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Serif description */}
+                        <div style={{ fontFamily: t.serif, fontStyle: 'italic', fontSize: 15, color: t.textMuted, lineHeight: 1.65 }}>
+                          {ex.sub}. Byg det op gradvist og mærk forskellen i koordinationen.
+                        </div>
+
+                        {/* Metadata pills */}
+                        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                          {ex.tags.map(tag => (
+                            <span key={tag} style={{ fontSize: 10, fontWeight: 600, padding: '4px 10px', borderRadius: 999, background: t.surface, color: t.textMuted, border: `1px solid ${t.border}`, fontFamily: t.mono }}>{tag}</span>
+                          ))}
+                          <span style={{ fontSize: 10, fontWeight: 600, padding: '4px 10px', borderRadius: 999, background: t.surface, color: t.textMuted, border: `1px solid ${t.border}`, fontFamily: t.mono }}>{ex.bpm} BPM</span>
+                        </div>
+
+                        {/* Actions */}
+                        <div style={{ display: 'flex', gap: 8 }}>
+                          <Btn t={t} size="sm" icon={<IcPlay size={11} />}>Start øvelse</Btn>
+                        </div>
+                      </div>
+                    )}
+
+                    {activeExTab === 'noder' && (
+                      <div style={{
+                        borderRadius: 10, overflow: 'hidden',
+                        background: '#FAF8F5', border: `1px solid ${t.border}`,
+                        padding: '20px 12px',
+                      }}>
+                        <DrumNotation color="#16161a" width={400} accent={t.accent} active={-1} />
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
           );
         })}
       </div>
@@ -1190,254 +1364,131 @@ function ExercisesView({ t, isPremium, onUpgrade, completedIds }: { t: T; isPrem
 }
 
 // ─── STUDIO VIEW ─────────────────────────────────────────────
-function StudioView({ t }: { t: T; dark: boolean }) {
+function StudioView({ t }: { t: T; dark?: boolean }) {
   const pads = [
-    { label: 'Hi-hat', sub: 'Closed', freq: 800, key: 'H' }, { label: 'Hi-hat', sub: 'Open', freq: 700, key: 'G' },
-    { label: 'Crash', sub: '16"', freq: 600, key: 'C' }, { label: 'Snare', sub: 'Center', freq: 200, key: 'S' },
-    { label: 'Tom 1', sub: '10"', freq: 350, key: 'T' }, { label: 'Tom 2', sub: '12"', freq: 280, key: 'Y' },
-    { label: 'Floor', sub: '14"', freq: 180, key: 'F' }, { label: 'Ride', sub: '20"', freq: 500, key: 'R' },
-    { label: 'Kick', sub: 'Bass', freq: 60, key: 'K' },
+    { label: 'Hi-hat', sub: 'Lukket', desc: 'Holdes lukket med foden. Giver en skarp, kort lyd. Bruges til at markere 8.-dele og 16.-dele.' },
+    { label: 'Hi-hat', sub: 'Åben', desc: 'Åbnes med foden for en længere, svævende lyd. Bruges til accenter og variation i grooves.' },
+    { label: 'Crash', desc: 'Cymbal med skarp, eksplosiv lyd. Bruges til at markere slag og overgange — typisk på takt 1.' },
+    { label: 'Lilletromme', desc: 'Kernen i de fleste grooves. Spilles typisk på slag 2 og 4 i 4/4-takt. Snare-lyd.' },
+    { label: 'Tom 1', sub: '10"', desc: 'Lille tom — høj toneleje. Bruges i fills fra høj til lav. Placeret tæt på bækkenet.' },
+    { label: 'Tom 2', sub: '12"', desc: 'Mellemtom. Lidt dybere end Tom 1. Del af standard fill-bevægelsen nedad.' },
+    { label: 'Gulvtom', sub: '14"', desc: 'Dyb, kraftfuld lyd. Sidder på gulvet til højre. Bruges som afslutning på fills og i tunge grooves.' },
+    { label: 'Ride', sub: '20"', desc: 'Cymbal til rytmisk fremføring. Bruges i jazz og som alternativ til hi-hat. Giver en tydelig "ping"-lyd.' },
+    { label: 'Stortromme', desc: 'Spilles med foden via en pedal. Markerer takt 1 og 3 i standard rock — fundamentet i alle grooves.' },
   ];
-  const [active, setActive] = useState<Record<number, number>>({});
-  const [bpm, setBpm] = useState(92);
-  const [metro, setMetro] = useState(false);
-  const [vols, setVols] = useState<Record<string, number>>({ kick: 80, snare: 70, hihat: 65, toms: 60, cymbals: 55 });
-  const [rec, setRec] = useState(false);
-
-  // Shared AudioContext (reused across hits to avoid Safari limits)
-  const audioCtxRef = useRef<AudioContext | null>(null);
-  const channelGainsRef = useRef<Record<string, GainNode>>({});
-  const volsRef = useRef(vols);
-  useEffect(() => { volsRef.current = vols; }, [vols]);
-
-  const getCtx = () => {
-    if (!audioCtxRef.current || audioCtxRef.current.state === 'closed') {
-      audioCtxRef.current = new (window.AudioContext || (window as Window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext)();
-      channelGainsRef.current = {};
-    }
-    if (audioCtxRef.current.state === 'suspended') audioCtxRef.current.resume();
-    return audioCtxRef.current;
-  };
-
-  const getChannelGain = (ctx: AudioContext, channel: string): GainNode => {
-    if (!channelGainsRef.current[channel]) {
-      const g = ctx.createGain();
-      g.connect(ctx.destination);
-      channelGainsRef.current[channel] = g;
-    }
-    channelGainsRef.current[channel].gain.value = (volsRef.current[channel] ?? 100) / 100;
-    return channelGainsRef.current[channel];
-  };
-
-  const hit = useCallback((i: number) => {
-    setActive(a => ({ ...a, [i]: Date.now() }));
-    setTimeout(() => setActive(a => { const n = { ...a }; delete n[i]; return n; }), 220);
-    try {
-      const ctx = getCtx();
-      const now = ctx.currentTime;
-      const label = pads[i].label;
-
-      if (label === 'Kick') {
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(160, now);
-        osc.frequency.exponentialRampToValueAtTime(40, now + 0.12);
-        gain.gain.setValueAtTime(1.0, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.38);
-        osc.connect(gain); gain.connect(getChannelGain(ctx, 'kick'));
-        osc.start(now); osc.stop(now + 0.4);
-
-      } else if (label === 'Snare') {
-        const ch = getChannelGain(ctx, 'snare');
-        const bufSize = ctx.sampleRate * 0.2;
-        const buf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
-        const data = buf.getChannelData(0);
-        for (let j = 0; j < bufSize; j++) data[j] = (Math.random() * 2 - 1);
-        const noise = ctx.createBufferSource();
-        noise.buffer = buf;
-        const noiseGain = ctx.createGain();
-        noiseGain.gain.setValueAtTime(0.7, now);
-        noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
-        noise.connect(noiseGain); noiseGain.connect(ch);
-        noise.start(now); noise.stop(now + 0.2);
-
-        const body = ctx.createOscillator();
-        const bodyGain = ctx.createGain();
-        body.type = 'triangle';
-        body.frequency.setValueAtTime(220, now);
-        body.frequency.exponentialRampToValueAtTime(80, now + 0.08);
-        bodyGain.gain.setValueAtTime(0.5, now);
-        bodyGain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
-        body.connect(bodyGain); bodyGain.connect(ch);
-        body.start(now); body.stop(now + 0.12);
-
-      } else if (label === 'Hi-hat') {
-        const bufSize = ctx.sampleRate * 0.06;
-        const buf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
-        const data = buf.getChannelData(0);
-        for (let j = 0; j < bufSize; j++) data[j] = (Math.random() * 2 - 1);
-        const noise = ctx.createBufferSource();
-        noise.buffer = buf;
-        const filter = ctx.createBiquadFilter();
-        filter.type = 'bandpass';
-        filter.frequency.value = pads[i].sub === 'Open' ? 8000 : 10000;
-        filter.Q.value = 0.8;
-        const gain = ctx.createGain();
-        const decay = pads[i].sub === 'Open' ? 0.25 : 0.06;
-        gain.gain.setValueAtTime(0.55, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + decay);
-        noise.connect(filter); filter.connect(gain); gain.connect(getChannelGain(ctx, 'hihat'));
-        noise.start(now); noise.stop(now + decay + 0.01);
-
-      } else if (label === 'Crash' || label === 'Ride') {
-        const bufSize = ctx.sampleRate * 0.8;
-        const buf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
-        const data = buf.getChannelData(0);
-        for (let j = 0; j < bufSize; j++) data[j] = (Math.random() * 2 - 1);
-        const noise = ctx.createBufferSource();
-        noise.buffer = buf;
-        const filter = ctx.createBiquadFilter();
-        filter.type = 'highpass';
-        filter.frequency.value = label === 'Crash' ? 6000 : 4500;
-        const gain = ctx.createGain();
-        const decay = label === 'Crash' ? 0.7 : 0.4;
-        gain.gain.setValueAtTime(0.45, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + decay);
-        noise.connect(filter); filter.connect(gain); gain.connect(getChannelGain(ctx, 'cymbals'));
-        noise.start(now); noise.stop(now + decay + 0.01);
-
-      } else {
-        const freqMap: Record<string, [number, number]> = {
-          'Tom 1': [280, 100], 'Tom 2': [220, 80], 'Floor': [170, 60],
-        };
-        const [start, end] = freqMap[label] ?? [200, 70];
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(start, now);
-        osc.frequency.exponentialRampToValueAtTime(end, now + 0.18);
-        gain.gain.setValueAtTime(0.8, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
-        osc.connect(gain); gain.connect(getChannelGain(ctx, 'toms'));
-        osc.start(now); osc.stop(now + 0.32);
-      }
-    } catch { }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const hitRef = useRef(hit);
-  useEffect(() => { hitRef.current = hit; }, [hit]);
-
-  useEffect(() => {
-    const keys: Record<string, number> = { 'h': 0, 'g': 1, 'c': 2, 's': 3, 't': 4, 'y': 5, 'f': 6, 'r': 7, 'k': 8 };
-    const onKey = (e: KeyboardEvent) => { const idx = keys[e.key.toLowerCase()]; if (idx !== undefined) { e.preventDefault(); hitRef.current(idx); } };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, []);
-
+  const [selectedPad, setSelectedPad] = useState<number | null>(null);
   return (
     <div style={{ padding: '28px 44px 60px', color: t.text, fontFamily: t.font }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 24 }}>
-        <div>
-          <Sect t={t} color={t.accent}>Virtuelt trommesæt</Sect>
-          <Display t={t} size={48}>Studio Kit</Display>
-        </div>
-        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-          <button onClick={() => setRec(!rec)} style={{
-            display: 'flex', alignItems: 'center', gap: 8,
-            background: rec ? t.accent : 'transparent',
-            border: `1px solid ${rec ? t.accent : t.borderStrong}`,
-            color: rec ? '#fff' : t.text, padding: '9px 16px', borderRadius: 999,
-            cursor: 'pointer', fontSize: 11, fontWeight: 700, letterSpacing: 1.4, textTransform: 'uppercase',
-          }}>
-            <div style={{ width: 8, height: 8, borderRadius: '50%', background: rec ? '#fff' : t.accent }} />
-            {rec ? 'Stop' : 'Optag'}
-          </button>
-        </div>
+      <div style={{ marginBottom: 28 }}>
+        <Sect t={t} color={t.accent}>Lær trommesættet at kende</Sect>
+        <Display t={t} size={44}>Trommesættet</Display>
+        <p style={{ fontSize: 13, color: t.textMuted, marginTop: 10, maxWidth: 520 }}>
+          Tryk på en del af trommesættet for at se hvad den hedder og hvordan den bruges.
+        </p>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: 18 }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          {/* Kit illustration */}
-          <Card t={t} pad={0} style={{ position: 'relative', overflow: 'hidden', height: 240 }}>
-            <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <div style={{ position: 'absolute', width: 380, height: 380, background: `radial-gradient(circle, ${t.accentSoft} 0%, transparent 65%)` }} />
-              <IllKit size={380} color={t.accent} sw={1.3} />
-            </div>
-            <div style={{ position: 'absolute', top: 16, left: 20, display: 'flex', alignItems: 'center', gap: 8 }}>
-              <div style={{ width: 8, height: 8, borderRadius: '50%', background: t.good }} />
-              <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1.5, textTransform: 'uppercase', color: t.textMuted }}>Live</span>
-            </div>
-            <div style={{ position: 'absolute', top: 16, right: 20, fontFamily: t.mono, fontSize: 11, color: t.textMuted }}>
-              <span style={{ color: t.text, fontWeight: 700 }}>{bpm}</span> BPM
-            </div>
-          </Card>
-
-          {/* Pads grid */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
-            {pads.map((pad, i) => (
-              <button key={i} onClick={() => hit(i)} style={{
-                padding: '24px 12px 18px', borderRadius: 14, border: `1.5px solid ${active[i] ? t.accent : t.border}`,
-                background: active[i] ? t.accentSoft : t.surface,
-                cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
-                transition: 'all 0.05s', transform: active[i] ? 'scale(0.96)' : 'scale(1)',
-                boxShadow: active[i] ? `0 0 20px ${t.accentSoft}` : 'none',
-                position: 'relative',
-              }}>
-                <div style={{ position: 'absolute', top: 6, right: 8, fontSize: 8.5, fontFamily: t.mono, fontWeight: 700, color: active[i] ? t.accent : t.textDim, padding: '1px 4.5px', background: active[i] ? t.surface : t.surface2, borderRadius: 4, border: `1px solid ${t.borderStrong}` }}>
-                  {pad.key}
-                </div>
-                <div style={{ fontSize: 13, fontWeight: 700, color: active[i] ? t.accent : t.text }}>{pad.label}</div>
-                <div style={{ fontSize: 10, fontFamily: t.mono, color: t.textDim }}>{pad.sub}</div>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 18 }}>
+        {/* Pad grid */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, alignContent: 'start' }}>
+          {pads.map((pad, i) => {
+            const isSelected = selectedPad === i;
+            return (
+              <button
+                key={i}
+                onClick={() => setSelectedPad(isSelected ? null : i)}
+                style={{
+                  padding: '20px 10px 16px',
+                  borderRadius: 14,
+                  border: `1.5px solid ${isSelected ? t.accent : t.border}`,
+                  background: isSelected ? t.accentSoft : t.surface,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: 4,
+                  transition: 'all 0.15s',
+                  transform: isSelected ? 'scale(0.97)' : 'scale(1)',
+                }}
+              >
+                <div style={{ fontSize: 12.5, fontWeight: 700, color: isSelected ? t.accent : t.text, textAlign: 'center' }}>{pad.label}</div>
+                {pad.sub && <div style={{ fontSize: 9.5, fontFamily: t.mono, color: t.textDim }}>{pad.sub}</div>}
               </button>
-            ))}
-          </div>
-
-          {/* BPM */}
-          <Card t={t} pad={18} style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
-            <IcMetro size={18} color={t.textMuted} />
-            <div style={{ flex: 1 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1.5, textTransform: 'uppercase', color: t.textMuted }}>Tempo</span>
-                <span style={{ fontFamily: t.mono, fontSize: 14, fontWeight: 700, color: t.text }}>{bpm} BPM</span>
-              </div>
-              <input type="range" min={40} max={220} value={bpm} onChange={e => setBpm(+e.target.value)} style={{ width: '100%', accentColor: t.accent }} />
-            </div>
-            <button onClick={() => setMetro(!metro)} style={{
-              padding: '8px 14px', borderRadius: 8, border: `1px solid ${metro ? t.accent : t.border}`,
-              background: metro ? t.accentSoft : 'transparent', color: metro ? t.accent : t.textMuted,
-              fontSize: 11, fontWeight: 700, cursor: 'pointer', letterSpacing: 1,
-            }}>
-              {metro ? '◼ STOP' : '▶ METRO'}
-            </button>
-          </Card>
+            );
+          })}
         </div>
 
-        {/* Mixer */}
-        <Card t={t} pad={20}>
-          <Sect t={t} style={{ marginBottom: 18 }}>Mixer</Sect>
-          {Object.entries(vols).map(([ch, vol]) => (
-            <div key={ch} style={{ marginBottom: 18 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
-                <span style={{ fontSize: 11, fontWeight: 700, textTransform: 'capitalize', letterSpacing: 0.5 }}>{ch}</span>
-                <span style={{ fontFamily: t.mono, fontSize: 10, color: t.textMuted }}>{vol}</span>
+        {/* Info panel */}
+        <Card t={t} pad={24} style={{ alignSelf: 'start', minHeight: 200 }}>
+          {selectedPad !== null ? (
+            <div>
+              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1.6, textTransform: 'uppercase', color: t.accent, marginBottom: 8 }}>
+                {pads[selectedPad].label}{pads[selectedPad].sub ? ` — ${pads[selectedPad].sub}` : ''}
               </div>
-              <input type="range" min={0} max={100} value={vol} onChange={e => setVols(v => ({ ...v, [ch]: +e.target.value }))} style={{ width: '100%', accentColor: t.accent }} />
+              <p style={{ fontSize: 14, color: t.text, lineHeight: 1.7, margin: 0 }}>
+                {pads[selectedPad].desc}
+              </p>
             </div>
-          ))}
-          <Sect t={t} style={{ marginTop: 20, marginBottom: 12 }}>Tip</Sect>
-          <div style={{ fontSize: 11.5, color: t.textMuted, lineHeight: 1.6 }}>
-            Brug tangenterne H G C S T Y F R K til at spille på pads.
-          </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', minHeight: 160, color: t.textMuted, textAlign: 'center' }}>
+              <div style={{ fontSize: 28, marginBottom: 10 }}>🥁</div>
+              <div style={{ fontSize: 13 }}>Tryk på en del af trommesættet for at lære om den.</div>
+            </div>
+          )}
         </Card>
       </div>
     </div>
   );
 }
 
+// ─── RADIAL RING ──────────────────────────────────────────────
+function RadialRing({ size = 100, pct = 62, sw = 8, color = '#f25545', track = 'rgba(255,255,255,0.08)', label, sub }: { size?: number; pct?: number; sw?: number; color?: string; track?: string; label: string; sub?: string }) {
+  const r = (size - sw) / 2;
+  const c = 2 * Math.PI * r;
+  const off = c * (1 - pct / 100);
+  return (
+    <div style={{ position: 'relative', width: size, height: size }}>
+      <svg width={size} height={size}>
+        <circle cx={size / 2} cy={size / 2} r={r} stroke={track} strokeWidth={sw} fill="none"/>
+        <circle cx={size / 2} cy={size / 2} r={r} stroke={color} strokeWidth={sw} fill="none"
+                strokeDasharray={c} strokeDashoffset={off} strokeLinecap="round"
+                transform={`rotate(-90 ${size / 2} ${size / 2})`}
+                style={{ transition: 'stroke-dashoffset 0.7s ease-out' }}/>
+      </svg>
+      <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ fontFamily: 'var(--font-serif, Georgia, serif)', fontStyle: 'italic', fontSize: size * 0.22, lineHeight: 1 }}>{label}</div>
+        {sub && <div style={{ fontSize: size * 0.095, color: 'var(--text-muted)', marginTop: 2 }}>{sub}</div>}
+      </div>
+    </div>
+  );
+}
+
+// ─── WEEK BARS ────────────────────────────────────────────────
+function WeekBars({ values = [22, 38, 12, 0, 45, 30, 18], t }: { values?: number[]; t: T }) {
+  const max = Math.max(...values, 1);
+  const days = ['M', 'T', 'O', 'T', 'F', 'L', 'S'];
+  return (
+    <div style={{ display: 'flex', alignItems: 'flex-end', gap: 6, height: 72, marginTop: 4 }}>
+      {values.map((v, i) => {
+        const h = Math.max(4, (v / max) * 62);
+        return (
+          <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+            <div className={`anim-pop d-${i * 50}`} style={{
+              width: '100%', height: h,
+              background: v > 0 ? `linear-gradient(180deg, #ff7a4f, ${t.accent})` : t.surface2,
+              borderRadius: 4,
+              boxShadow: v > 0 ? `0 0 8px rgba(242,85,69,0.25)` : 'none',
+              transition: 'height 0.4s ease-out',
+            }}/>
+            <span style={{ fontSize: 9, color: t.textMuted, fontWeight: 600, fontFamily: t.mono }}>{days[i]}</span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 // ─── PROFILE VIEW ─────────────────────────────────────────────
-function ProfileView({ t, dark, setDark, isPremium, onUpgrade, completedIds, onReset }: { t: T; dark: boolean; setDark: (d: boolean) => void; isPremium: boolean; onUpgrade: () => void; completedIds: string[]; onReset: () => void }) {
+function ProfileView({ t, dark, setDark, isPremium, onUpgrade, completedIds, onReset, onNavigateExercises }: { t: T; dark: boolean; setDark: (d: boolean) => void; isPremium: boolean; onUpgrade: () => void; completedIds: string[]; onReset: () => void; onNavigateExercises?: () => void }) {
   const { user, login, logout } = useAuth();
   const [loginLoading, setLoginLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
@@ -1580,43 +1631,109 @@ function ProfileView({ t, dark, setDark, isPremium, onUpgrade, completedIds, onR
         </div>
       )}
 
-      {/* Stats */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 40 }}>
-        {[
-          { icon: <IcFlame size={15} color={t.accent} />, value: '7', label: 'Streak dage' },
-          { icon: <IcClock size={15} />, value: '18t', label: 'Total øvetid' },
-          { icon: <IcTrophy size={15} />, value: `${completedIds.length}`, label: 'Lektioner ✓' },
-          { icon: <IcCheck size={15} color={t.good} />, value: '2/10', label: 'Moduler i gang' },
-        ].map((s, i) => (
-          <Card key={i} t={t} pad={20}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
-              <div style={{ width: 28, height: 28, borderRadius: '50%', border: `1px solid ${t.borderStrong}`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: t.text }}>{s.icon}</div>
-              <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1.5, textTransform: 'uppercase', color: t.textMuted }}>{s.label}</span>
+      {/* Stats grid — 2+2 */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
+        {/* Streak tile */}
+        <Card t={t} pad={20} style={{ position: 'relative', overflow: 'hidden' }} className="anim-fade-up d-80">
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12 }}>
+            <IcFlame size={14} color={t.accent} />
+            <Sect t={t} style={{ marginBottom: 0, fontSize: 9 }}>Streak</Sect>
+          </div>
+          <Display t={t} size={56} style={{ lineHeight: 0.9, marginBottom: 4 }}>
+            {user?.streak || 0}
+          </Display>
+          <div style={{ fontSize: 11, color: t.textMuted, marginTop: 4 }}>dage i træk</div>
+          {/* Celebration rings */}
+          {(user?.streak || 0) >= 7 && (
+            <div className="anim-celeb" style={{ position: 'absolute', bottom: -20, right: -20, width: 60, height: 60 }}>
+              <i style={{ position: 'absolute', inset: 0, borderRadius: '50%', border: `2px solid ${t.accent}`, animationDelay: '0ms' }}/>
+              <i style={{ position: 'absolute', inset: 0, borderRadius: '50%', border: `2px solid ${t.accent}`, animationDelay: '500ms' }}/>
             </div>
-            <div style={{ fontFamily: t.serif, fontStyle: 'italic', fontSize: 38, lineHeight: 1, color: t.text }}>{s.value}</div>
-          </Card>
-        ))}
+          )}
+        </Card>
+
+        {/* XP radial ring */}
+        <Card t={t} pad={20} className="anim-fade-up d-160">
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
+            <IcTrophy size={14} color={t.good} />
+            <Sect t={t} style={{ marginBottom: 0, fontSize: 9 }}>Niveau {user?.level || 1}</Sect>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'center', margin: '4px 0 6px' }}>
+            <RadialRing
+              size={90}
+              pct={((user?.xp || 0) % 200) / 2}
+              label={`${Math.round(((user?.xp || 0) % 200) / 2)}%`}
+              sub={`til niv. ${(user?.level || 1) + 1}`}
+              color={t.accent}
+              track="rgba(255,255,255,0.07)"
+            />
+          </div>
+          <div style={{ fontSize: 11, color: t.textMuted, textAlign: 'center', marginTop: 4 }}>
+            {200 - ((user?.xp || 0) % 200)} XP til næste
+          </div>
+        </Card>
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: 12, marginBottom: 40 }}>
+        {/* Week bars */}
+        <Card t={t} pad={18} className="anim-fade-up d-240">
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <IcClock size={14} color={t.text} />
+              <Sect t={t} style={{ marginBottom: 0, fontSize: 9 }}>Denne uge</Sect>
+            </div>
+            <span style={{ fontFamily: t.mono, fontSize: 10, color: t.textMuted }}>2t 45m</span>
+          </div>
+          <WeekBars values={[22, 38, 12, 0, 45, 30, 18]} t={t} />
+        </Card>
+
+        {/* Completed count */}
+        <Card t={t} pad={18} className="anim-fade-up d-320">
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
+            <IcCheck size={14} color={t.good} />
+            <Sect t={t} style={{ marginBottom: 0, fontSize: 9 }}>Færdige</Sect>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
+            <Display t={t} size={52} style={{ lineHeight: 0.9 }}>{completedIds.length || 34}</Display>
+            <IcCheck size={18} color={t.good} sw={2.5} />
+          </div>
+          <div style={{ fontSize: 11, color: t.textMuted, marginTop: 8 }}>lektioner i alt</div>
+        </Card>
       </div>
 
       {/* Pillars progress */}
-      <Sect t={t} style={{ marginBottom: 18 }}>Fremskridt per søjle</Sect>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 12, marginBottom: 40 }}>
-        {PILLARS.map(p => {
+      <Sect t={t} style={{ marginBottom: 14 }}>Fremskridt per søjle</Sect>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 40 }}>
+        {PILLARS.map((p, pi) => {
           const pillarLessons = MODULES.filter(m => m.pillarId === p.id).flatMap(m => m.lessons);
           const done = pillarLessons.filter(l => completedIds.includes(l.id)).length;
           const pct = pillarLessons.length ? Math.round((done / pillarLessons.length) * 100) : 0;
           return (
-            <Card key={p.id} t={t} pad={18}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
-                <span style={{ fontSize: 20 }}>{p.icon}</span>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 2 }}>{p.name}</div>
-                  <div style={{ fontSize: 10.5, color: t.textMuted, fontFamily: t.mono }}>{done}/{pillarLessons.length} lektioner</div>
+            <div
+              key={p.id}
+              className={`card-lift anim-fade-up d-${(pi + 4) * 80}`}
+              onClick={onNavigateExercises}
+              style={{
+                background: t.surface, border: `1px solid ${t.border}`, borderRadius: 14,
+                padding: '12px 16px', cursor: onNavigateExercises ? 'pointer' : 'default',
+                display: 'flex', alignItems: 'center', gap: 14,
+              }}
+            >
+              <div style={{ flex: 1 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 7 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span style={{ fontSize: 16 }}>{p.icon}</span>
+                    <span style={{ fontSize: 13, fontWeight: 500, color: t.text }}>{p.name}</span>
+                  </div>
+                  <span style={{ fontFamily: t.mono, fontSize: 11, color: t.textMuted }}>{pct}%</span>
                 </div>
-                <span style={{ fontFamily: t.mono, fontSize: 12, fontWeight: 700, color: pct > 0 ? t.accent : t.textDim }}>{pct}%</span>
+                <div className="bar anim-progress" style={{ height: 5 }}>
+                  <i style={{ '--pct': pct + '%' } as React.CSSProperties} />
+                </div>
+                <div style={{ fontSize: 10, color: t.textDim, marginTop: 5, fontFamily: t.mono }}>{done}/{pillarLessons.length} lektioner</div>
               </div>
-              <Prog pct={pct} t={t} h={4} />
-            </Card>
+              {onNavigateExercises && <IcChev size={12} color={t.textDim} />}
+            </div>
           );
         })}
       </div>
@@ -1799,7 +1916,6 @@ export default function App() {
   const [showCheckout, setShowCheckout] = useState(false);
   const [, setPlan] = useState<UserPlan | null>(null);
   const [completedIds, setCompletedIds] = useState<string[]>([]);
-  const [rhythmHeroOpen, setRhythmHeroOpen] = useState(false);
 
   const t = useMemo(() => mkT(dark), [dark]);
   // Sync state with user profile
@@ -1878,7 +1994,6 @@ export default function App() {
           setSelectedCategory(cat);
           setView('category');
         }}
-        setRhythmHeroOpen={setRhythmHeroOpen}
       />
     );
   }
@@ -1895,7 +2010,7 @@ export default function App() {
   }
   else if (view === 'exercises') content = <ExercisesView t={t} isPremium={isPremium} onUpgrade={openCheckout} completedIds={completedIds} />;
   else if (view === 'studio') content = <StudioView t={t} dark={dark} />;
-  else if (view === 'profile') content = <ProfileView t={t} dark={dark} setDark={setDark} isPremium={isPremium} onUpgrade={openCheckout} completedIds={completedIds} onReset={handleReset} />;
+  else if (view === 'profile') content = <ProfileView t={t} dark={dark} setDark={setDark} isPremium={isPremium} onUpgrade={openCheckout} completedIds={completedIds} onReset={handleReset} onNavigateExercises={() => setView('exercises')} />;
 
   const hideCoach = view === 'studio';
 
@@ -1935,32 +2050,6 @@ export default function App() {
         <CheckoutModal t={t} onClose={() => setShowCheckout(false)} onSuccess={handlePremiumSuccess} />
       )}
 
-      {/* Rhythm Hero Game modal overlay */}
-      {rhythmHeroOpen && (
-        <RhythmHero 
-          onClose={() => setRhythmHeroOpen(false)} 
-          onAwardXP={async (awardedXp) => {
-            try {
-              if (user) {
-                const nextXp = (user.xp || 0) + awardedXp;
-                const nextLevel = Math.floor(nextXp / 200) + 1;
-                const { firestoreService } = await import('@/lib/firestoreService');
-                await firestoreService.saveUserProfile(user.uid, {
-                  xp: nextXp,
-                  level: nextLevel
-                });
-              } else {
-                const currentLocalXp = Number(localStorage.getItem('pocketdrummer_xp') || '120');
-                const nextLocalXp = currentLocalXp + awardedXp;
-                localStorage.setItem('pocketdrummer_xp', String(nextLocalXp));
-              }
-            } catch (err) {
-              console.error("Error awarding RhythmHero XP:", err);
-            }
-          }}
-          tTokens={t}
-        />
-      )}
     </div>
   );
 }

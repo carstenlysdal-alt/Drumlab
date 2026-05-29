@@ -47,6 +47,7 @@ export default function AdminPage() {
   const [measures, setMeasures] = useState(2);
   const [focus, setFocus] = useState("Ghost notes og svage snare beats");
   const [genre, setGenre] = useState("Rock");
+  const [youtubeId, setYoutubeId] = useState("");
   const [scanDescription, setScanDescription] = useState("");
   
   // Prompts
@@ -331,7 +332,7 @@ Vigtige regler:
       kategori: category,
       sværhedsgrad: difficulty,
       varighed: measures * 3,
-      youtube_video_id: "84G2yU_q1c0", // Standard video til demo
+      youtube_video_id: youtubeId.trim() || "84G2yU_q1c0",
       musicxml_data: xmlData,
       tempo,
       takter: measures,
@@ -583,6 +584,19 @@ Vigtige regler:
                       onChange={(e) => setTempo(Number(e.target.value))}
                     />
                   </div>
+                </div>
+
+                {/* YouTube video ID */}
+                <div className="form-group" style={{ marginBottom: 0, marginTop: '10px' }}>
+                  <label className="form-label" style={{ fontSize: '0.75rem', marginBottom: '3px' }}>YouTube Video ID (valgfrit)</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    style={{ padding: '8px 12px', fontSize: '0.85rem' }}
+                    placeholder="F.eks. dQw4w9WgXcQ"
+                    value={youtubeId}
+                    onChange={(e) => setYoutubeId(e.target.value)}
+                  />
                 </div>
               </div>
             )}
